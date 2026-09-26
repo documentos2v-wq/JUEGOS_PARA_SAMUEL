@@ -3,21 +3,21 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Dino T-Rex Mobile - Streamlit",
-    page_icon="🦖",
+    page_title="Reto Mental Capcioso - Streamlit",
+    page_icon="🧠",
     layout="centered"
 )
 
-st.title("🦖 Dinosaurio de Google: Versión Móvil")
-st.write("¡Optimizado para celulares! **Toca la pantalla o presiona la pantalla** para hacer saltar al dinosaurio y esquivar los cactus.")
+st.title("🧠 Reto Mental: Preguntas Capciosas y Adivinanzas")
+st.write("Resuelve acertijos ingeniosos. Cada acierto te genera un desafío totalmente nuevo sin repetir preguntas anteriores.")
 
-# Código HTML, CSS y JS optimizado para pantallas táctiles y móviles
+# Código HTML, CSS y JS con banco de preguntas único y dinámico
 game_code = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             background-color: #0f172a;
@@ -28,247 +28,247 @@ game_code = """
             align-items: center;
             justify-content: center;
             margin: 0;
-            padding: 5px;
-            touch-action: manipulation;
+            padding: 15px;
         }
-        .container {
+        .card {
             background: rgba(30, 41, 59, 0.95);
             border: 2px solid #38bdf8;
-            padding: 10px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-            text-align: center;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            text-align: center;
         }
-        #score-panel {
+        .stats {
+            display: flex;
+            justify-content: space-between;
             font-size: 15px;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             color: #38bdf8;
-            letter-spacing: 1px;
         }
-        canvas {
-            background-color: #f8fafc;
-            border-radius: 6px;
-            display: block;
-            margin: 0 auto;
-            width: 100%;
-            max-width: 380px;
-            height: 160px;
-            outline: none;
-            box-shadow: inset 0 0 8px rgba(0,0,0,0.08);
-            cursor: pointer;
+        .question-box {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #e2e8f0;
+            border-left: 4px solid #f59e0b;
+            line-height: 1.4;
         }
-        .instructions {
-            margin-top: 8px;
-            font-size: 12px;
-            color: #94a3b8;
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
         }
-        #jump-btn {
-            background: linear-gradient(45deg, #38bdf8, #2563eb);
+        .option-btn {
+            background: #334155;
             color: white;
             border: none;
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
+            padding: 12px;
+            font-size: 14px;
             font-weight: bold;
             border-radius: 8px;
-            margin-top: 10px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+            transition: 0.2s;
+            text-align: left;
+            padding-left: 15px;
         }
-        #jump-btn:active {
-            transform: scale(0.98);
+        .option-btn:hover:not(:disabled) {
+            background: #38bdf8;
+            color: #0f172a;
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        #feedback {
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 24px;
+        }
+        #next-btn {
+            background: linear-gradient(45deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+            display: none;
+        }
+        #next-btn:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="score-panel">HI: 00000 &nbsp;&nbsp; 00000</div>
-        <canvas id="gameCanvas" width="400" height="170" tabindex="1"></canvas>
-        <button id="jump-btn" onclick="triggerJump()">¡SALTAR! 🦖</button>
-        <div class="instructions">Toca la pantalla o usa el botón para saltar.</div>
+    <div class="card">
+        <div class="stats">
+            <div id="score">Aciertos: 0</div>
+            <div id="remaining">Restantes: 0</div>
+        </div>
+
+        <div class="question-box" id="questionText">Cargando desafío mental...</div>
+
+        <div class="options-container" id="optionsContainer"></div>
+
+        <div id="feedback"></div>
+
+        <button id="next-btn" onclick="loadNextQuestion()">Siguiente Reto 🚀</button>
     </div>
 
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+        // Banco extenso de preguntas capciosas y adivinanzas para evitar repeticiones
+        const masterQuestions = [
+            {
+                q: "¿Qué sube y baja pero siempre se queda en el mismo lugar?",
+                options: ["La temperatura", "Las escaleras", "Una montaña rusa", "El ascensor"],
+                answer: 1
+            },
+            {
+                q: "Iba con 7 perros rumbo a Lima. Cada perro llevaba 7 sacos, cada saco 7 gatos, y cada gato 7 gatitos. ¿Cuántos animales iban rumbo a Lima?",
+                options: ["2,401 animales", "Ninguno, yo iba solo", "400 animales", "Depende del peso"],
+                answer: 1
+            },
+            {
+                q: "¿De qué color son las mangas del chaleco de un abuelo?",
+                options: ["Blancas", "Negras", "No tiene, es un chaleco", "Depende del traje"],
+                answer: 2
+            },
+            {
+                q: "Si un tren eléctrico viaja de norte a sur a gran velocidad, ¿hacia dónde va el humo?",
+                options: ["Hacia el norte", "Hacia el sur", "Hacia arriba", "Los trenes eléctricos no botan humo"],
+                answer: 3
+            },
+            {
+                q: "¿Qué cosa es que, cuanto más le quitas, más grande se vuelve?",
+                options: ["Un hoyo o zanja", "Una piedra", "Una esponja", "El dinero"],
+                answer: 0
+            },
+            {
+                q: "Tengo dos monedas que suman 30 céntimos exactos y una de ellas no es de 10 céntimos. ¿Cuáles son las monedas?",
+                options: ["Una de 20 y una de 10", "Tres de 10 céntimos", "Una de 25 y una de 5", "Dos de 15"],
+                answer: 0
+            },
+            {
+                q: "¿Qué pasa si tiras un sombrero blanco al Mar Rojo?",
+                options: ["Se hunde", "Se moja", "Se pierde", "Flota sin romperse"],
+                answer: 1
+            },
+            {
+                q: "Cinco hermanos están en una cabaña jugando ajedrez. Uno lee, otro cocina, otro barre, otro juega cartas. ¿Qué hace el quinto hermano?",
+                options: ["Duerme", "Juega ajedrez", "Lava los platos", "Mira la ventana"],
+                answer: 1
+            },
+            {
+                q: "¿Cuántos animales metió Moisés en el arca de su viaje?",
+                options: ["Una pareja de cada especie", "Muchos animales", "Cien animales", "Ninguno, fue Noé, no Moisés"],
+                answer: 3
+            },
+            {
+                q: "Hijo de mi padre, pero no mi hermano. ¿Quién es?",
+                options: ["Mi tío", "Yo mismo", "Mi hijo", "Mi sobrino"],
+                answer: 1
+            },
+            {
+                q: "¿Qué tiene cabeza y cuerpo, pero no tiene pies ni piernas?",
+                options: ["Un alfiler o clavo", "Una serpiente", "Una moneda", "Una cama"],
+                answer: 0
+            },
+            {
+                q: "Si hay 3 manzanas y te llevas 2, ¿cuántas manzanas tienes?",
+                options: ["1 manzana", "3 manzanas", "2 manzanas", "Ninguna"],
+                answer: 2
+            }
+        ];
 
+        let availableQuestions = [];
+        let currentQuestion = null;
         let score = 0;
-        let highscore = 0;
-        let gameSpeed = 4.5;
-        let isGameOver = false;
-        let gameStarted = false;
+        let answered = false;
 
-        let dino = {
-            x: 35,
-            y: 95,
-            width: 36,
-            height: 40,
-            vy: 0,
-            gravity: 0.55,
-            jumpPower: -9.5,
-            isJumping: false
-        };
-
-        let obstacles = [];
-        let obstacleTimer = 0;
-
-        function triggerJump() {
-            if (!gameStarted || isGameOver) {
-                resetGame();
-            } else if (!dino.isJumping) {
-                dino.vy = dino.jumpPower;
-                dino.isJumping = true;
-            }
-        }
-
-        // Eventos táctiles y de teclado
-        window.addEventListener("keydown", (e) => {
-            if (["Space", "ArrowUp", "KeyW"].includes(e.code)) {
-                e.preventDefault();
-                triggerJump();
-            }
-        });
-
-        canvas.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            triggerJump();
-        }, { passive: false });
-
-        canvas.addEventListener("click", () => {
-            triggerJump();
-        });
-
-        function resetGame() {
+        function initGame() {
+            // Copiar todas las preguntas al array disponible
+            availableQuestions = [...masterQuestions];
             score = 0;
-            gameSpeed = 4.5;
-            obstacles = [];
-            obstacleTimer = 0;
-            dino.y = 95;
-            dino.vy = 0;
-            dino.isJumping = false;
-            isGameOver = false;
-            gameStarted = true;
-            loop();
+            loadNextQuestion();
         }
 
-        function update() {
-            if (isGameOver || !gameStarted) return;
-
-            dino.vy += dino.gravity;
-            dino.y += dino.vy;
-
-            if (dino.y > 95) {
-                dino.y = 95;
-                dino.vy = 0;
-                dino.isJumping = false;
+        function loadNextQuestion() {
+            if (availableQuestions.length === 0) {
+                document.getElementById("questionText").innerText = "🏆 ¡Felicidades! Has respondido correctamente todas las preguntas sin repetir ninguna.";
+                document.getElementById("optionsContainer").innerHTML = "";
+                document.getElementById("feedback").innerText = "";
+                document.getElementById("next-btn").innerText = "REINICIAR TODO";
+                document.getElementById("next-btn").style.display = "inline-block";
+                document.getElementById("next-btn").onclick = initGame;
+                return;
             }
 
-            obstacleTimer++;
-            if (obstacleTimer > Math.random() * 55 + 75) {
-                obstacles.push({
-                    x: canvas.width,
-                    y: 100,
-                    width: 20,
-                    height: 35
-                });
-                obstacleTimer = 0;
-            }
+            answered = false;
+            document.getElementById("feedback").innerText = "";
+            document.getElementById("next-btn").style.display = "none";
 
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].x -= gameSpeed;
+            // Seleccionar pregunta aleatoria y retirarla de la lista para que nunca se repita
+            let randomIndex = Math.floor(Math.random() * availableQuestions.length);
+            currentQuestion = availableQuestions.splice(randomIndex, 1)[0];
 
-                if (
-                    dino.x + 5 < obstacles[i].x + obstacles[i].width - 3 &&
-                    dino.x + dino.width - 5 > obstacles[i].x + 3 &&
-                    dino.y + 4 < obstacles[i].y + obstacles[i].height &&
-                    dino.y + dino.height > obstacles[i].y
-                ) {
-                    isGameOver = true;
-                    if (score > highscore) highscore = Math.floor(score);
-                }
+            document.getElementById("questionText").innerText = currentQuestion.q;
+            document.getElementById("score").innerText = "Aciertos: " + score;
+            document.getElementById("remaining").innerText = "Restantes: " + (availableQuestions.length + 1);
 
-                if (obstacles[i].x + obstacles[i].width < 0) {
-                    obstacles.splice(i, 1);
-                    score += 10;
-                }
-            }
+            let optContainer = document.getElementById("optionsContainer");
+            optContainer.innerHTML = "";
 
-            gameSpeed = 4.5 + Math.floor(score / 100);
-        }
-
-        function draw() {
-            ctx.fillStyle = "#f8fafc";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Suelo
-            ctx.strokeStyle = "#475569";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, 135);
-            ctx.lineTo(canvas.width, 135);
-            ctx.stroke();
-
-            // Dinosaurio HD
-            ctx.save();
-            let dx = dino.x;
-            let dy = dino.y;
-            ctx.fillStyle = "#334155";
-            ctx.fillRect(dx + 10, dy + 12, 20, 18); // Cuerpo
-            ctx.fillRect(dx + 20, dy + 2, 14, 13);  // Cabeza
-            ctx.fillRect(dx + 29, dy + 6, 6, 6);    // Hocico
-            ctx.fillStyle = "#f8fafc";
-            ctx.fillRect(dx + 28, dy + 4, 2, 2);    // Ojo
-            ctx.fillStyle = "#334155";
-            ctx.fillRect(dx, dy + 15, 12, 6);       // Cola
-            ctx.fillRect(dx + 12, dy + 30, 5, 8);   // Pata 1
-            ctx.fillRect(dx + 21, dy + 30, 5, 8);   // Pata 2
-            ctx.restore();
-
-            // Cactus
-            obstacles.forEach(obs => {
-                ctx.fillStyle = "#15803d";
-                ctx.fillRect(obs.x + 6, obs.y, 6, obs.height);
-                ctx.fillRect(obs.x, obs.y + 10, 6, 5);
-                ctx.fillRect(obs.x + 12, obs.y + 16, 6, 5);
+            currentQuestion.options.forEach((opt, index) => {
+                let btn = document.createElement("button");
+                btn.classList.add("option-btn");
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, btn);
+                optContainer.appendChild(btn);
             });
-
-            if (!gameStarted) {
-                ctx.fillStyle = "#334155";
-                ctx.font = "14px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText("¡Toca la pantalla para Iniciar!", canvas.width / 2, canvas.height / 2);
-            } else if (isGameOver) {
-                ctx.fillStyle = "#ef4444";
-                ctx.font = "bold 18px sans-serif";
-                ctx.textAlign = "center";
-                ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 8);
-                ctx.fillStyle = "#334155";
-                ctx.font = "12px sans-serif";
-                ctx.fillText("Toca el botón para Reiniciar", canvas.width / 2, canvas.height / 2 + 14);
-            }
-
-            let scStr = Math.floor(score).toString().padStart(5, '0');
-            let hiStr = highscore.toString().padStart(5, '0');
-            document.getElementById("score-panel").innerText = `HI: ${hiStr}    ${scStr}`;
         }
 
-        function loop() {
-            update();
-            draw();
-            if (!isGameOver) {
-                requestAnimationFrame(loop);
+        function checkAnswer(selectedIndex, selectedBtn) {
+            if (answered) return;
+            answered = true;
+
+            let buttons = document.querySelectorAll(".option-btn");
+            buttons.forEach(b => b.disabled = true);
+
+            let feedbackDiv = document.getElementById("feedback");
+
+            if (selectedIndex === currentQuestion.answer) {
+                selectedBtn.style.background = "#22c55e";
+                feedbackDiv.style.color = "#22c55e";
+                feedbackDiv.innerText = "🎉 ¡Correcto! Ingeniosa respuesta.";
+                score++;
+                document.getElementById("score").innerText = "Aciertos: " + score;
+            } else {
+                selectedBtn.style.background = "#ef4444";
+                buttons[currentQuestion.answer].style.background = "#22c55e";
+                feedbackDiv.style.color = "#ef4444";
+                feedbackDiv.innerText = "❌ ¡Caíste en la trampa! Esa no era.";
             }
+
+            document.getElementById("next-btn").style.display = "inline-block";
         }
 
-        draw();
+        // Iniciar juego al cargar
+        initGame();
     </script>
 </body>
 </html>
 """
 
-# Renderizar en Streamlit adaptado a móvil
-components.html(game_code, height=360)
+# Renderizar en Streamlit
+components.html(game_code, height=525)
