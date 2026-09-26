@@ -1,17 +1,30 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Configuración de la página
+# Configuración de la página en pantalla completa
 st.set_page_config(
     page_title="Reto Mental Capcioso - Streamlit",
     page_icon="🧠",
-    layout="centered"
+    layout="wide"
 )
 
-st.title("🧠 Reto Mental: Preguntas Capciosas y Adivinanzas")
-st.write("Resuelve acertijos ingeniosos. Cada acierto te genera un desafío totalmente nuevo sin repetir preguntas anteriores.")
+# Ocultar la barra superior y márgenes predeterminados de Streamlit para una experiencia inmersiva total
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+.block-container {
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+    padding-left: 0rem;
+    padding-right: 0rem;
+}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Código HTML, CSS y JS con banco de preguntas único y dinámico
+# Código HTML, CSS y JS con diseño a pantalla completa y letras grandes
 game_code = """
 <!DOCTYPE html>
 <html lang="es">
@@ -19,8 +32,11 @@ game_code = """
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
-            background-color: #0f172a;
+            background-color: #000000;
             color: #f8fafc;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -28,80 +44,91 @@ game_code = """
             align-items: center;
             justify-content: center;
             margin: 0;
-            padding: 15px;
-        }
-        .card {
-            background: rgba(30, 41, 59, 0.95);
-            border: 2px solid #38bdf8;
             padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container-fullscreen {
+            background: #050505;
             width: 100%;
-            max-width: 450px;
-            text-align: center;
+            height: 100%;
+            max-width: 900px;
+            max-height: 650px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 30px;
+            border-radius: 16px;
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.25);
         }
         .stats {
             display: flex;
             justify-content: space-between;
-            font-size: 15px;
+            font-size: 20px;
             font-weight: bold;
-            margin-bottom: 15px;
             color: #38bdf8;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 15px;
         }
         .question-box {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            color: #e2e8f0;
-            border-left: 4px solid #f59e0b;
-            line-height: 1.4;
+            background: #0f172a;
+            padding: 25px;
+            border-radius: 12px;
+            font-size: 24px;
+            color: #ffffff;
+            border-left: 6px solid #f59e0b;
+            line-height: 1.5;
+            text-align: center;
+            margin: 15px 0;
         }
         .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
         .option-btn {
-            background: #334155;
+            background: #1e293b;
             color: white;
-            border: none;
-            padding: 12px;
-            font-size: 14px;
+            border: 2px solid #334155;
+            padding: 18px 20px;
+            font-size: 19px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             transition: 0.2s;
             text-align: left;
-            padding-left: 15px;
         }
         .option-btn:hover:not(:disabled) {
             background: #38bdf8;
-            color: #0f172a;
+            color: #000000;
+            border-color: #38bdf8;
         }
         .option-btn:disabled {
             cursor: not-allowed;
             opacity: 0.7;
         }
+        .footer-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 50px;
+        }
         #feedback {
-            font-size: 15px;
+            font-size: 20px;
             font-weight: bold;
-            margin-top: 10px;
-            min-height: 24px;
         }
         #next-btn {
             background: linear-gradient(45deg, #22c55e, #16a34a);
             color: white;
             border: none;
-            padding: 10px 24px;
-            font-size: 14px;
+            padding: 14px 30px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
-            margin-top: 15px;
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
             display: none;
         }
         #next-btn:hover {
@@ -111,7 +138,7 @@ game_code = """
 </head>
 <body>
 
-    <div class="card">
+    <div class="container-fullscreen">
         <div class="stats">
             <div id="score">Aciertos: 0</div>
             <div id="remaining">Restantes: 0</div>
@@ -121,13 +148,13 @@ game_code = """
 
         <div class="options-container" id="optionsContainer"></div>
 
-        <div id="feedback"></div>
-
-        <button id="next-btn" onclick="loadNextQuestion()">Siguiente Reto 🚀</button>
+        <div class="footer-area">
+            <div id="feedback"></div>
+            <button id="next-btn" onclick="loadNextQuestion()">Siguiente Reto 🚀</button>
+        </div>
     </div>
 
     <script>
-        // Banco extenso de preguntas capciosas y adivinanzas para evitar repeticiones
         const masterQuestions = [
             {
                 q: "¿Qué sube y baja pero siempre se queda en el mismo lugar?",
@@ -197,7 +224,6 @@ game_code = """
         let answered = false;
 
         function initGame() {
-            // Copiar todas las preguntas al array disponible
             availableQuestions = [...masterQuestions];
             score = 0;
             loadNextQuestion();
@@ -218,7 +244,6 @@ game_code = """
             document.getElementById("feedback").innerText = "";
             document.getElementById("next-btn").style.display = "none";
 
-            // Seleccionar pregunta aleatoria y retirarla de la lista para que nunca se repita
             let randomIndex = Math.floor(Math.random() * availableQuestions.length);
             currentQuestion = availableQuestions.splice(randomIndex, 1)[0];
 
@@ -249,26 +274,30 @@ game_code = """
 
             if (selectedIndex === currentQuestion.answer) {
                 selectedBtn.style.background = "#22c55e";
+                selectedBtn.style.borderColor = "#22c55e";
+                selectedBtn.style.color = "#000000";
                 feedbackDiv.style.color = "#22c55e";
-                feedbackDiv.innerText = "🎉 ¡Correcto! Ingeniosa respuesta.";
+                feedbackDiv.innerText = "🎉 ¡Correcto!";
                 score++;
                 document.getElementById("score").innerText = "Aciertos: " + score;
             } else {
                 selectedBtn.style.background = "#ef4444";
+                selectedBtn.style.borderColor = "#ef4444";
                 buttons[currentQuestion.answer].style.background = "#22c55e";
+                buttons[currentQuestion.answer].style.borderColor = "#22c55e";
+                buttons[currentQuestion.answer].style.color = "#000000";
                 feedbackDiv.style.color = "#ef4444";
-                feedbackDiv.innerText = "❌ ¡Caíste en la trampa! Esa no era.";
+                feedbackDiv.innerText = "❌ ¡Incorrecto!";
             }
 
             document.getElementById("next-btn").style.display = "inline-block";
         }
 
-        // Iniciar juego al cargar
         initGame();
     </script>
 </body>
 </html>
 """
 
-# Renderizar en Streamlit
-components.html(game_code, height=525)
+# Renderizar a pantalla completa con altura amplia en Streamlit
+components.html(game_code, height=650)
