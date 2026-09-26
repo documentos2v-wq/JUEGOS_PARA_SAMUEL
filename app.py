@@ -3,15 +3,15 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Dragon Ball Sudoku Z - Streamlit",
-    page_icon="🐉",
+    page_title="Dino T-Rex Game 2026 - Streamlit",
+    page_icon="🦖",
     layout="centered"
 )
 
-st.title("🐉 Dragon Ball Sudoku: ¡Entrenamiento de Kaiō-sama!")
-st.write("Domina tu Ki resolviendo este Sudoku. Completa el tablero sin repetir números del 1 al 9 en filas, columnas ni bloques de 3x3.")
+st.title("🦖 Dinosaurio de Google: Edición Nocturna")
+st.write("Presiona la **Barra Espaciadora** o la **Flecha Arriba** para saltar sobre los cactus y descansar un rato antes de dormir.")
 
-# Código HTML, CSS y JS rediseñado con alta calidad visual
+# Código HTML, CSS y JS del juego del T-Rex
 game_code = """
 <!DOCTYPE html>
 <html lang="es">
@@ -19,7 +19,7 @@ game_code = """
     <meta charset="utf-8">
     <style>
         body {
-            background-color: #0b0f19;
+            background-color: #121212;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -30,242 +30,220 @@ game_code = """
             padding: 10px;
         }
         .container {
-            background: linear-gradient(135deg, #1e1b4b, #0f172a);
-            border: 3px solid #fbbf24;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 0 35px rgba(251, 191, 36, 0.35);
+            background: #1e1e1e;
+            border: 2px solid #555;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             text-align: center;
-            max-width: 420px;
         }
-        .header-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
+        #score-panel {
+            font-size: 16px;
             font-weight: bold;
-            color: #f59e0b;
-            margin-bottom: 15px;
-            text-transform: uppercase;
+            margin-bottom: 10px;
+            color: #aaa;
             letter-spacing: 1px;
         }
-        table {
-            border-collapse: collapse;
-            margin: 0 auto 20px auto;
-            border: 4px solid #f59e0b;
-            background-color: #020617;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-        }
-        td {
-            border: 1px solid #334155;
-            width: 40px;
-            height: 40px;
-            text-align: center;
-        }
-        /* Bordes gruesos para los bloques de 3x3 */
-        tr:nth-child(3) td, tr:nth-child(6) td {
-            border-bottom: 4px solid #f59e0b;
-        }
-        td:nth-child(3), td:nth-child(6) {
-            border-right: 4px solid #f59e0b;
-        }
-        input.sudoku-cell {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            color: #38bdf8;
-            font-size: 19px;
-            font-weight: bold;
-            text-align: center;
-            border: none;
+        canvas {
+            background-color: #f7f7f7;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
             outline: none;
         }
-        input.sudoku-cell:focus {
-            background: rgba(56, 189, 248, 0.15);
-            color: #f43f5e;
-        }
-        input.sudoku-cell.given {
-            color: #fde047;
-            background: rgba(253, 224, 71, 0.05);
-            text-shadow: 0 0 8px rgba(253, 224, 71, 0.4);
-        }
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-        }
-        .db-btn {
-            background: linear-gradient(45deg, #f59e0b, #ef4444);
-            color: #ffffff;
-            border: none;
-            padding: 10px 18px;
-            font-weight: bold;
+        .instructions {
+            margin-top: 10px;
             font-size: 13px;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
-            transition: 0.2s;
-            text-transform: uppercase;
-        }
-        .db-btn:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #fbbf24, #dc2626);
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.7);
-        }
-        #message {
-            margin-top: 15px;
-            font-size: 15px;
-            font-weight: bold;
-            color: #38bdf8;
-            min-height: 24px;
-            text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+            color: #888;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header-info">
-            <div>🔥 Nivel Saiyan</div>
-            <div id="status">Ki Estable</div>
-        </div>
-
-        <div id="sudoku-board"></div>
-
-        <div class="btn-group">
-            <button class="db-btn" onclick="checkSolution()">¡Liberar Poder!</button>
-            <button class="db-btn" onclick="resetBoard()">Reiniciar</button>
-        </div>
-
-        <div id="message"></div>
+        <div id="score-panel">HI: 00000 &nbsp;&nbsp;&nbsp; 00000</div>
+        <canvas id="gameCanvas" width="600" height="200" tabindex="1"></canvas>
+        <div class="instructions">Usa la <strong>Barra Espaciadora</strong> o <strong>Flecha Arriba</strong> para saltar.</div>
     </div>
 
     <script>
-        const initialBoard = [
-            [5, 3, 0, 0, 7, 0, 0, 0, 0],
-            [6, 0, 0, 1, 9, 5, 0, 0, 0],
-            [0, 9, 8, 0, 0, 0, 0, 6, 0],
-            [8, 0, 0, 0, 6, 0, 0, 0, 3],
-            [4, 0, 0, 8, 0, 3, 0, 0, 1],
-            [7, 0, 0, 0, 2, 0, 0, 0, 6],
-            [0, 6, 0, 0, 0, 0, 2, 8, 0],
-            [0, 0, 0, 4, 1, 9, 0, 0, 5],
-            [0, 0, 0, 0, 8, 0, 0, 7, 9]
-        ];
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
 
-        let currentBoard = JSON.parse(JSON.stringify(initialBoard));
+        canvas.focus();
 
-        function renderBoard() {
-            const boardContainer = document.getElementById("sudoku-board");
-            boardContainer.innerHTML = "";
-            let table = document.createElement("table");
+        let score = 0;
+        let highscore = 0;
+        let gameSpeed = 5;
+        let isGameOver = false;
+        let gameStarted = false;
 
-            for (let r = 0; r < 9; r++) {
-                let row = document.createElement("tr");
-                for (let c = 0; c < 9; c++) {
-                    let cell = document.createElement("td");
-                    let input = document.createElement("input");
-                    input.type = "text";
-                    input.maxLength = 1;
-                    input.className = "sudoku-cell";
+        // Dinosaurio
+        let dino = {
+            x: 50,
+            y: 130,
+            width: 30,
+            height: 40,
+            vy: 0,
+            gravity: 0.6,
+            jumpPower: -10,
+            isJumping: false
+        };
 
-                    if (initialBoard[r][c] !== 0) {
-                        input.value = initialBoard[r][c];
-                        input.disabled = true;
-                        input.classList.add("given");
-                    } else {
-                        input.value = currentBoard[r][c] !== 0 ? currentBoard[r][c] : "";
-                        input.oninput = (e) => {
-                            let val = parseInt(e.target.value);
-                            if (isNaN(val) || val < 1 || val > 9) {
-                                e.target.value = "";
-                                currentBoard[r][c] = 0;
-                            } else {
-                                currentBoard[r][c] = val;
-                            }
-                        };
-                    }
-                    cell.appendChild(input);
-                    row.appendChild(cell);
-                }
-                table.appendChild(row);
-            }
-            boardContainer.appendChild(table);
-        }
+        // Obstáculos (Cactus)
+        let obstacles = [];
+        let obstacleTimer = 0;
 
-        function checkSolution() {
-            const inputs = document.querySelectorAll(".sudoku-cell");
-            let index = 0;
-            let isComplete = true;
-
-            for (let r = 0; r < 9; r++) {
-                for (let c = 0; c < 9; c++) {
-                    if (initialBoard[r][c] === 0) {
-                        let val = parseInt(inputs[index].value);
-                        if (isNaN(val)) {
-                            isComplete = false;
-                        }
-                        currentBoard[r][c] = isNaN(val) ? 0 : val;
-                    }
-                    index++;
+        window.addEventListener("keydown", (e) => {
+            if (["Space", "ArrowUp", "KeyW"].includes(e.code)) {
+                e.preventDefault();
+                if (!gameStarted || isGameOver) {
+                    resetGame();
+                } else if (!dino.isJumping) {
+                    dino.vy = dino.jumpPower;
+                    dino.isJumping = true;
                 }
             }
+        });
 
-            let msg = document.getElementById("message");
-            if (!isComplete) {
-                msg.style.color = "#f43f5e";
-                msg.innerText = "⚠️ ¡Celdas vacías! ¡Entrena más duro!";
-                return;
+        // Click en canvas para saltar en móviles/tablets
+        canvas.addEventListener("click", () => {
+            if (!gameStarted || isGameOver) {
+                resetGame();
+            } else if (!dino.isJumping) {
+                dino.vy = dino.jumpPower;
+                dino.isJumping = true;
             }
+        });
 
-            if (isValidSudoku(currentBoard)) {
-                msg.style.color = "#22c55e";
-                msg.innerText = "🐉 ¡Impresionante! ¡Super Saiyan Blue alcanzado!";
-            } else {
-                msg.style.color = "#f43f5e";
-                msg.innerText = "❌ ¡Inestabilidad de Ki! Hay números repetidos.";
-            }
+        function resetGame() {
+            score = 0;
+            gameSpeed = 5;
+            obstacles = [];
+            obstacleTimer = 0;
+            dino.y = 130;
+            dino.vy = 0;
+            dino.isJumping = false;
+            isGameOver = false;
+            gameStarted = true;
+            loop();
         }
 
-        function isValidSudoku(board) {
-            for (let i = 0; i < 9; i++) {
-                let rowSet = new Set();
-                let colSet = new Set();
-                let boxSet = new Set();
+        function update() {
+            if (isGameOver || !gameStarted) return;
 
-                for (let j = 0; j < 9; j++) {
-                    let rVal = board[i][j];
-                    if (rVal !== 0) {
-                        if (rowSet.has(rVal)) return false;
-                        rowSet.add(rVal);
-                    }
-                    let cVal = board[j][i];
-                    if (cVal !== 0) {
-                        if (colSet.has(cVal)) return false;
-                        colSet.add(cVal);
-                    }
-                    let rowIndex = 3 * Math.floor(i / 3) + Math.floor(j / 3);
-                    let colIndex = 3 * (i % 3) + (j % 3);
-                    let bVal = board[rowIndex][colIndex];
-                    if (bVal !== 0) {
-                        if (boxSet.has(bVal)) return false;
-                        boxSet.add(bVal);
-                    }
+            // Movimiento del Dinosaurio (Gravedad)
+            dino.vy += dino.gravity;
+            dino.y += dino.vy;
+
+            // Suelo
+            if (dino.y > 130) {
+                dino.y = 130;
+                dino.vy = 0;
+                dino.isJumping = false;
+            }
+
+            // Generar obstáculos
+            obstacleTimer++;
+            if (obstacleTimer > Math.random() * 50 + 70) {
+                let obsWidth = 15 + Math.random() * 15;
+                let obsHeight = 25 + Math.random() * 20;
+                obstacles.push({
+                    x: canvas.width,
+                    y: 170 - obsHeight,
+                    width: obsWidth,
+                    height: obsHeight
+                });
+                obstacleTimer = 0;
+            }
+
+            // Mover obstáculos y detectar colisiones
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= gameSpeed;
+
+                // Colisión AABB
+                if (
+                    dino.x < obstacles[i].x + obstacles[i].width &&
+                    dino.x + dino.width > obstacles[i].x &&
+                    dino.y < obstacles[i].y + obstacles[i].height &&
+                    dino.y + dino.height > obstacles[i].y
+                ) {
+                    isGameOver = true;
+                    if (score > highscore) highscore = Math.floor(score);
+                }
+
+                // Eliminar fuera de pantalla
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    score += 10;
                 }
             }
-            return true;
+
+            // Incrementar dificultad progresiva
+            gameSpeed = 5 + Math.floor(score / 100);
         }
 
-        function resetBoard() {
-            currentBoard = JSON.parse(JSON.stringify(initialBoard));
-            renderBoard();
-            document.getElementById("message").innerText = "🔄 Tablero restaurado. ¡Concéntrate!";
+        function draw() {
+            // Limpiar lienzo
+            ctx.fillStyle = "#f7f7f7";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Suelo
+            ctx.strokeStyle = "#535353";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, 170);
+            ctx.lineTo(canvas.width, 170);
+            ctx.stroke();
+
+            // Dibujar Dinosaurio (Clásico T-Rex pixelado minimalista)
+            ctx.fillStyle = "#535353";
+            ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+            // Ojo del dino
+            ctx.fillStyle = "#f7f7f7";
+            ctx.fillRect(dino.x + 20, dino.y + 6, 4, 4);
+
+            // Dibujar Cactus
+            ctx.fillStyle = "#2e7d32";
+            obstacles.forEach(obs => {
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            });
+
+            // Pantalla de inicio o fin
+            if (!gameStarted) {
+                ctx.fillStyle = "#535353";
+                ctx.font = "16px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("Presiona Espacio o Clic para Jugar", canvas.width / 2, canvas.height / 2);
+            } else if (isGameOver) {
+                ctx.fillStyle = "#535353";
+                ctx.font = "20px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("G A M E   O V E R", canvas.width / 2, canvas.height / 2 - 10);
+                ctx.font = "12px sans-serif";
+                ctx.fillText("Presiona Espacio para Reiniciar", canvas.width / 2, canvas.height / 2 + 15);
+            }
+
+            // Actualizar Marcador
+            let scStr = Math.floor(score).toString().padStart(5, '0');
+            let hiStr = highscore.toString().padStart(5, '0');
+            document.getElementById("score-panel").innerText = `HI: ${hiStr}    ${scStr}`;
         }
 
-        renderBoard();
+        function loop() {
+            update();
+            draw();
+            if (!isGameOver) {
+                requestAnimationFrame(loop);
+            }
+        }
+
+        // Renderizado inicial estático
+        draw();
     </script>
 </body>
 </html>
 """
 
 # Renderizar en Streamlit
-components.html(game_code, height=580)
+components.html(game_code, height=300)
