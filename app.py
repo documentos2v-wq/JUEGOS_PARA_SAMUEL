@@ -2,12 +2,12 @@ import streamlit as st
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(
-    page_title="Reto Mental Capcioso",
+    page_title="Reto Mental Infinito",
     page_icon="🧠",
     layout="wide"
 )
 
-# Estilo para quitar los márgenes por defecto de Streamlit y forzar pantalla negra total
+# Estilo para quitar márgenes y forzar pantalla negra total
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
@@ -30,7 +30,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Código HTML y JS incrustado con diseño responsivo a pantalla completa real
+# Código HTML y JS con bucle infinito y banco expansible de preguntas capciosas
 game_html = """
 <!DOCTYPE html>
 <html lang="es">
@@ -149,7 +149,7 @@ game_html = """
 
     <div class="stats">
         <div id="score">Aciertos: 0</div>
-        <div id="remaining">Restantes: 0</div>
+        <div id="roundInfo">Modo Infinito</div>
     </div>
 
     <div class="question-container">
@@ -164,66 +164,21 @@ game_html = """
 
     <script>
         const masterQuestions = [
-            {
-                q: "¿Qué sube y baja pero siempre se queda en el mismo lugar?",
-                options: ["La temperatura", "Las escaleras", "Una montaña rusa", "El ascensor"],
-                answer: 1
-            },
-            {
-                q: "Iba con 7 perros rumbo a Lima. Cada perro llevaba 7 sacos, cada saco 7 gatos, y cada gato 7 gatitos. ¿Cuántos animales iban rumbo a Lima?",
-                options: ["2,401 animales", "Ninguno, yo iba solo", "400 animales", "Depende del peso"],
-                answer: 1
-            },
-            {
-                q: "¿De qué color son las mangas del chaleco de un abuelo?",
-                options: ["Blancas", "Negras", "No tiene, es un chaleco", "Depende del traje"],
-                answer: 2
-            },
-            {
-                q: "Si un tren eléctrico viaja de norte a sur a gran velocidad, ¿hacia dónde va el humo?",
-                options: ["Hacia el norte", "Hacia el sur", "Hacia arriba", "Los trenes eléctricos no botan humo"],
-                answer: 3
-            },
-            {
-                q: "¿Qué cosa es que, cuanto más le quitas, más grande se vuelve?",
-                options: ["Un hoyo o zanja", "Una piedra", "Una esponja", "El dinero"],
-                answer: 0
-            },
-            {
-                q: "Tengo dos monedas que suman 30 céntimos exactos y una de ellas no es de 10 céntimos. ¿Cuáles son las monedas?",
-                options: ["Una de 20 y una de 10", "Tres de 10 céntimos", "Una de 25 y una de 5", "Dos de 15"],
-                answer: 0
-            },
-            {
-                q: "¿Qué pasa si tiras un sombrero blanco al Mar Rojo?",
-                options: ["Se hunde", "Se moja", "Se pierde", "Flota sin romperse"],
-                answer: 1
-            },
-            {
-                q: "Cinco hermanos están en una cabaña jugando ajedrez. Uno lee, otro cocina, otro barre, otro juega cartas. ¿Qué hace el quinto hermano?",
-                options: ["Duerme", "Juega ajedrez", "Lava los platos", "Mira la ventana"],
-                answer: 1
-            },
-            {
-                q: "¿Cuántos animales metió Moisés en el arca de su viaje?",
-                options: ["Una pareja de cada especie", "Muchos animales", "Cien animales", "Ninguno, fue Noé, no Moisés"],
-                answer: 3
-            },
-            {
-                q: "Hijo de mi padre, pero no mi hermano. ¿Quién es?",
-                options: ["Mi tío", "Yo mismo", "Mi hijo", "Mi sobrino"],
-                answer: 1
-            },
-            {
-                q: "¿Qué tiene cabeza y cuerpo, pero no tiene pies ni piernas?",
-                options: ["Un alfiler o clavo", "Una serpiente", "Una moneda", "Una cama"],
-                answer: 0
-            },
-            {
-                q: "Si hay 3 manzanas y te llevas 2, ¿cuántas manzanas tienes?",
-                options: ["1 manzana", "3 manzanas", "2 manzanas", "Ninguna"],
-                answer: 2
-            }
+            { q: "¿Qué sube y baja pero siempre se queda en el mismo lugar?", options: ["La temperatura", "Las escaleras", "Una montaña rusa", "El ascensor"], answer: 1 },
+            { q: "Iba con 7 perros rumbo a Lima. Cada perro llevaba 7 sacos, cada saco 7 gatos, y cada gato 7 gatitos. ¿Cuántos animales iban rumbo a Lima?", options: ["2,401 animales", "Ninguno, yo iba solo", "400 animales", "Depende del peso"], answer: 1 },
+            { q: "¿De qué color son las mangas del chaleco de un abuelo?", options: ["Blancas", "Negras", "No tiene, es un chaleco", "Depende del traje"], answer: 2 },
+            { q: "Si un tren eléctrico viaja de norte a sur a gran velocidad, ¿hacia dónde va el humo?", options: ["Hacia el norte", "Hacia el sur", "Hacia arriba", "Los trenes eléctricos no botan humo"], answer: 3 },
+            { q: "¿Qué cosa es que, cuanto más le quitas, más grande se vuelve?", options: ["Un hoyo o zanja", "Una piedra", "Una esponja", "El dinero"], answer: 0 },
+            { q: "Tengo dos monedas que suman 30 céntimos exactos y una de ellas no es de 10 céntimos. ¿Cuáles son las monedas?", options: ["Una de 20 y una de 10", "Tres de 10 céntimos", "Una de 25 y una de 5", "Dos de 15"], answer: 0 },
+            { q: "¿Qué pasa si tiras un sombrero blanco al Mar Rojo?", options: ["Se hunde", "Se moja", "Se pierde", "Flota sin romperse"], answer: 1 },
+            { q: "Cinco hermanos están en una cabaña jugando ajedrez. Uno lee, otro cocina, otro barre, otro juega cartas. ¿Qué hace el quinto hermano?", options: ["Duerme", "Juega ajedrez", "Lava los platos", "Mira la ventana"], answer: 1 },
+            { q: "¿Cuántos animales metió Moisés en el arca de su viaje?", options: ["Una pareja de cada especie", "Muchos animales", "Cien animales", "Ninguno, fue Noé, no Moisés"], answer: 3 },
+            { q: "Hijo de mi padre, pero no mi hermano. ¿Quién es?", options: ["Mi tío", "Yo mismo", "Mi hijo", "Mi sobrino"], answer: 1 },
+            { q: "¿Qué tiene cabeza y cuerpo, pero no tiene pies ni piernas?", options: ["Un alfiler o clavo", "Una serpiente", "Una moneda", "Una cama"], answer: 0 },
+            { q: "Si hay 3 manzanas y te llevas 2, ¿cuántas manzanas tienes?", options: ["1 manzana", "3 manzanas", "2 manzanas", "Ninguna"], answer: 2 },
+            { q: "¿Qué se puede romper sin siquiera tocarlo?", options: ["Un vaso de vidrio", "Una promesa o un secreto", "Un papel", "Un espejo"], answer: 1 },
+            { q: "¿De qué nacionalidad es un habitante que nace en la frontera entre Chile y Perú?", options: ["Chileno", "Peruano", "Depende de sus padres", "Ninguno, es ciudadano fronterizo"], answer: 2 },
+            { q: "Entra a la iglesia con tres nombres y sale con uno solo. ¿Quién es?", options: ["Un sacerdote", "Una novia al casarse", "Un bautizado", "Un testigo"], answer: 1 }
         ];
 
         let availableQuestions = [];
@@ -232,20 +187,20 @@ game_html = """
         let answered = false;
 
         function initGame() {
-            availableQuestions = [...masterQuestions];
             score = 0;
+            refillPool();
             loadNextQuestion();
         }
 
+        function refillPool() {
+            // Recarga el banco de preguntas asegurando que ninguna se repita en el ciclo actual
+            availableQuestions = [...masterQuestions];
+        }
+
         function loadNextQuestion() {
+            // Si el banco temporal se vacía, se recarga automáticamente sin fin (Sin pantallas finales)
             if (availableQuestions.length === 0) {
-                document.getElementById("questionText").innerText = "🏆 ¡Felicidades! Has respondido correctamente todas las preguntas sin repetir ninguna.";
-                document.getElementById("optionsContainer").innerHTML = "";
-                document.getElementById("feedback").innerText = "";
-                document.getElementById("next-btn").innerText = "REINICIAR TODO";
-                document.getElementById("next-btn").style.display = "inline-block";
-                document.getElementById("next-btn").onclick = initGame;
-                return;
+                refillPool();
             }
 
             answered = false;
@@ -257,7 +212,6 @@ game_html = """
 
             document.getElementById("questionText").innerText = currentQuestion.q;
             document.getElementById("score").innerText = "Aciertos: " + score;
-            document.getElementById("remaining").innerText = "Restantes: " + (availableQuestions.length + 1);
 
             let optContainer = document.getElementById("optionsContainer");
             optContainer.innerHTML = "";
@@ -298,7 +252,7 @@ game_html = """
                 feedbackDiv.innerText = "❌ ¡Incorrecto!";
             }
 
-            document.getElementById("next-btn").style.display = "inline-block";
+            document.getElementById("next-btn").style.display = "block";
         }
 
         initGame();
@@ -307,5 +261,4 @@ game_html = """
 </html>
 """
 
-# Renderizar utilizando pantalla completa real mediante iframe fijo
 st.components.v1.html(game_html, height=800, scrolling=False)
