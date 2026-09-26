@@ -3,15 +3,15 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Dino T-Rex HD 3D - Streamlit",
+    page_title="Dino T-Rex HD - Streamlit",
     page_icon="🦖",
     layout="centered"
 )
 
 st.title("🦖 Dinosaurio de Google: Edición Gráfica HD")
-st.write("Disfruta del clásico juego del dinosaurio con sprites e imágenes reales en alta definición. Presiona la **Barra Espaciadora** o **Flecha Arriba** para saltar.")
+st.write("Disfruta del clásico juego con un diseño gráfico vectorial detallado de alta definición. Presiona la **Barra Espaciadora** o **Flecha Arriba** para saltar.")
 
-# Código HTML, CSS y JS con imágenes reales de T-Rex y obstáculos
+# Código HTML, CSS y JS con diseño vectorial HD impecable
 game_code = """
 <!DOCTYPE html>
 <html lang="es">
@@ -45,12 +45,12 @@ game_code = """
             letter-spacing: 1px;
         }
         canvas {
-            background-color: #ffffff;
+            background-color: #f8fafc;
             border-radius: 8px;
             display: block;
             margin: 0 auto;
             outline: none;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.08);
         }
         .instructions {
             margin-top: 10px;
@@ -79,19 +79,12 @@ game_code = """
         let isGameOver = false;
         let gameStarted = false;
 
-        // Cargar imágenes reales en alta definición para el T-Rex y los obstáculos
-        const dinoImg = new Image();
-        dinoImg.src = "https://cdn.jsdelivr.net/gh/wayou/t-rex-runner/img/trex.png";
-
-        const cactusImg = new Image();
-        cactusImg.src = "https://cdn.jsdelivr.net/gh/wayou/t-rex-runner/img/obstacle-1.png";
-
-        // Dinosaurio
+        // Dinosaurio estilizado HD
         let dino = {
             x: 50,
-            y: 135,
+            y: 130,
             width: 44,
-            height: 47,
+            height: 48,
             vy: 0,
             gravity: 0.6,
             jumpPower: -10.5,
@@ -127,7 +120,7 @@ game_code = """
             gameSpeed = 5;
             obstacles = [];
             obstacleTimer = 0;
-            dino.y = 135;
+            dino.y = 130;
             dino.vy = 0;
             dino.isJumping = false;
             isGameOver = false;
@@ -141,8 +134,8 @@ game_code = """
             dino.vy += dino.gravity;
             dino.y += dino.vy;
 
-            if (dino.y > 135) {
-                dino.y = 135;
+            if (dino.y > 130) {
+                dino.y = 130;
                 dino.vy = 0;
                 dino.isJumping = false;
             }
@@ -151,9 +144,9 @@ game_code = """
             if (obstacleTimer > Math.random() * 55 + 75) {
                 obstacles.push({
                     x: canvas.width,
-                    y: 138,
-                    width: 30,
-                    height: 44
+                    y: 135,
+                    width: 24,
+                    height: 43
                 });
                 obstacleTimer = 0;
             }
@@ -161,11 +154,11 @@ game_code = """
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 obstacles[i].x -= gameSpeed;
 
-                // Colisión ajustada con margen real de las imágenes
+                // Colisión precisa
                 if (
-                    dino.x + 8 < obstacles[i].x + obstacles[i].width - 6 &&
-                    dino.x + dino.width - 8 > obstacles[i].x + 6 &&
-                    dino.y + 5 < obstacles[i].y + obstacles[i].height &&
+                    dino.x + 6 < obstacles[i].x + obstacles[i].width - 4 &&
+                    dino.x + dino.width - 6 > obstacles[i].x + 4 &&
+                    dino.y + 4 < obstacles[i].y + obstacles[i].height &&
                     dino.y + dino.height > obstacles[i].y
                 ) {
                     isGameOver = true;
@@ -182,47 +175,69 @@ game_code = """
         }
 
         function draw() {
-            ctx.fillStyle = "#ffffff";
+            ctx.fillStyle = "#f8fafc";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Suelo detallado
-            ctx.strokeStyle = "#535353";
-            ctx.lineWidth = 2;
+            // Suelo del desierto
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(0, 182);
-            ctx.lineTo(canvas.width, 182);
+            ctx.moveTo(0, 178);
+            ctx.lineTo(canvas.width, 178);
             ctx.stroke();
 
-            // Dibujar Dinosaurio con imagen real HD
-            if (dinoImg.complete) {
-                ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
-            } else {
-                ctx.fillStyle = "#535353";
-                ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
-            }
+            // --- DIBUJAR DINOSAURIO HD DETALLADO ---
+            ctx.save();
+            let dx = dino.x;
+            let dy = dino.y;
 
-            // Dibujar Obstáculos (Cactus reales HD)
+            ctx.fillStyle = "#334155"; // Color principal del T-Rex
+            
+            // Cuerpo principal
+            ctx.fillRect(dx + 12, dy + 15, 24, 22);
+            // Cabeza
+            ctx.fillRect(dx + 24, dy + 2, 18, 16);
+            // Hocico y mandíbula
+            ctx.fillRect(dx + 35, dy + 8, 8, 8);
+            // Ojo brillante
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(dx + 34, dy + 5, 3, 3);
+            // Cola inclinada
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(dx, dy + 18, 14, 8);
+            ctx.fillRect(dx - 6, dy + 22, 8, 6);
+            // Patas dinámicas
+            ctx.fillRect(dx + 14, dy + 37, 6, 11);
+            ctx.fillRect(dx + 26, dy + 37, 6, 11);
+
+            ctx.restore();
+
+            // --- DIBUJAR CACTUS DETALLADOS HD ---
             obstacles.forEach(obs => {
-                if (cactusImg.complete) {
-                    ctx.drawImage(cactusImg, obs.x, obs.y, obs.width, obs.height);
-                } else {
-                    ctx.fillStyle = "#2e7d32";
-                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                }
+                ctx.fillStyle = "#15803d";
+                // Tronco central
+                ctx.fillRect(obs.x + 8, obs.y, 8, obs.height);
+                // Brazo izquierdo
+                ctx.fillRect(obs.x, obs.y + 12, 8, 6);
+                ctx.fillRect(obs.x, obs.y + 6, 4, 10);
+                // Brazo derecho
+                ctx.fillRect(obs.x + 16, obs.y + 20, 8, 6);
+                ctx.fillRect(obs.x + 20, obs.y + 14, 4, 12);
             });
 
             if (!gameStarted) {
-                ctx.fillStyle = "#535353";
+                ctx.fillStyle = "#334155";
                 ctx.font = "16px sans-serif";
                 ctx.textAlign = "center";
                 ctx.fillText("Presiona Espacio o Clic para Iniciar", canvas.width / 2, canvas.height / 2);
             } else if (isGameOver) {
-                ctx.fillStyle = "#535353";
-                ctx.font = "20px bold sans-serif";
+                ctx.fillStyle = "#ef4444";
+                ctx.font = "bold 22px sans-serif";
                 ctx.textAlign = "center";
                 ctx.fillText("G A M E   O V E R", canvas.width / 2, canvas.height / 2 - 10);
-                ctx.font = "13px sans-serif";
-                ctx.fillText("Presiona Espacio para Reiniciar", canvas.width / 2, canvas.height / 2 + 15);
+                ctx.fillStyle = "#334155";
+                ctx.font = "14px sans-serif";
+                ctx.fillText("Presiona Espacio para Reiniciar", canvas.width / 2, canvas.height / 2 + 18);
             }
 
             let scStr = Math.floor(score).toString().padStart(5, '0');
@@ -238,17 +253,7 @@ game_code = """
             }
         }
 
-        // Cargar imágenes antes de dibujar el estado estático inicial
-        let loadedCount = 0;
-        function checkLoaded() {
-            loadedCount++;
-            if (loadedCount === 2) draw();
-        }
-        dinoImg.onload = checkLoaded;
-        cactusImg.onload = checkLoaded;
-        
-        // Fallback por si cargan instantáneamente
-        setTimeout(draw, 100);
+        draw();
     </script>
 </body>
 </html>
