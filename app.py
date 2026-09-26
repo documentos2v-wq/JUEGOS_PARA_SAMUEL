@@ -3,16 +3,16 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Juego de la Culebrita - Streamlit",
-    page_icon="🐍",
+    page_title="Juego de Avioncitos - Streamlit",
+    page_icon="✈️",
     layout="centered"
 )
 
-st.title("🐍 Culebrita Retro en Streamlit")
-st.write("Haz clic dentro del cuadro del juego y usa las **flechas del teclado** para mover la serpiente.")
+st.title("✈️ Batalla de Avioncitos Retro")
+st.write("Haz clic dentro del cuadro, usa las **flechas izquierda y derecha** para mover tu avioncito y esquiva los meteoritos.")
 
-# Código HTML y JavaScript corregido
-game_code = """
+# Código HTML y JavaScript del juego de avioncitos
+airplane_game_code = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -35,135 +35,146 @@ game_code = """
             font-weight: bold;
         }
         canvas {
-            border: 3px solid #4CAF50;
-            background-color: #111;
+            border: 3px solid #00bcd4;
+            background-color: #050515;
             outline: none;
         }
     </style>
 </head>
 <body>
     <div id="score">Puntuación: 0</div>
-    <canvas id="gameCanvas" width="400" height="400" tabindex="1"></canvas>
+    <canvas id="gameCanvas" width="400" height="500" tabindex="1"></canvas>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Forzar foco en el canvas para que capte las teclas de inmediato
         canvas.focus();
 
-        const tileSize = 20;
-        const tileCount = canvas.width / tileSize;
-
-        let snake = [
-            { x: 10, y: 10 },
-            { x: 9, y: 10 },
-            { x: 8, y: 10 }
-        ];
-        let food = { x: 5, y: 5 };
-        let dx = 1; // Empieza moviéndose a la derecha de forma segura
-        let dy = 0;
         let score = 0;
-        let gameInterval;
-        let changingDirection = false;
+        let isGameOver = false;
 
-        document.addEventListener("keydown", changeDirection);
-        startGame();
+        // Propiedades del avión del jugador
+        let plane = {
+            x: 180,
+            y: 420,
+            width: 40,
+            height: 40,
+            speed: 6
+        };
+
+        // Obstáculos (meteoritos)
+        let obstacles = [];
+        let obstacleTimer = 0;
+
+        // Controles del teclado
+        let keys = {};
+        window.addEventListener("keydown", (e) => { keys[e.code] = true; });
+        window.addEventListener("keyup", (e) => { keys[e.code] = false; });
 
         function startGame() {
-            resetGame();
-            if(gameInterval) clearInterval(gameInterval);
-            gameInterval = setInterval(main, 120);
+            score = 0;
+            obstacles = [];
+            isGameOver = false;
+            plane.x = 180;
+            loop();
         }
 
-        function main() {
-            if (hasGameEnded()) {
-                alert("¡Juego terminado! Puntuación final: " + score);
-                resetGame();
+        function update() {
+            if (isGameOver) return;
+
+            // Movimiento del avión
+            if ((keys["ArrowLeft"] || keys["KeyA"]) && plane.x > 0) {
+                plane.x -= plane.speed;
+            }
+            if ((keys["ArrowRight"] || keys["KeyD"]) && plane.x + plane.width < canvas.width) {
+                plane.x += plane.speed;
+            }
+
+            // Generar obstáculos
+            obstacleTimer++;
+            if (obstacleTimer > 40) {
+                let obsX = Math.random() * (canvas.width - 35);
+                obstacles.push({ x: obsX, y: -40, width: 35, height: 35, speed: 4 + Math.random() * 3 });
+                obstacleTimer = 0;
+            }
+
+            // Mover obstáculos y detectar colisiones
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.y += obs.speed;
+
+                // Colisión con el avión
+                if (
+                    plane.x < obs.x + obs.width &&
+                    plane.x + plane.width > obs.x &&
+                    plane.y < obs.y + obs.height &&
+                    plane.y + plane.height > obs.y
+                ) {
+                    isGameOver = true;
+                }
+
+                // Eliminar obstáculos fuera de la pantalla y sumar puntos
+                if (obs.y > canvas.height) {
+                    obstacles.splice(i, 1);
+                    score += 10;
+                }
+            }
+        }
+
+        function draw() {
+            // Limpiar pantalla
+            ctx.fillStyle = "#050515";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar estrellas de fondo
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(50, 50, 2, 2);
+            ctx.fillRect(150, 120, 2, 2);
+            ctx.fillRect(300, 80, 2, 2);
+            ctx.fillRect(250, 300, 2, 2);
+            ctx.fillRect(80, 400, 2, 2);
+
+            // Dibujar Avioncito (Diseño simple en canvas)
+            ctx.fillStyle = "#00bcd4";
+            // Cuerpo del avión
+            ctx.fillRect(plane.x + 15, plane.y, 10, 40);
+            // Alas
+            ctx.fillStyle = "#ffeb3b";
+            ctx.fillRect(plane.x, plane.y + 15, 40, 10);
+            // Cabina
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(plane.x + 16, plane.y + 10, 8, 12);
+
+            // Dibujar obstáculos (Meteoritos)
+            ctx.fillStyle = "#ff5722";
+            obstacles.forEach(obs => {
+                ctx.beginPath();
+                ctx.arc(obs.x + obs.width / 2, obs.y + obs.height / 2, obs.width / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Actualizar marcador
+            document.getElementById("score").innerText = "Puntuación: " + score;
+        }
+
+        function loop() {
+            if (isGameOver) {
+                alert("¡Game Over! Te estrellaste. Puntuación final: " + score);
+                startGame();
                 return;
             }
-            changingDirection = false;
-            clearCanvas();
-            drawFood();
-            moveSnake();
-            drawSnake();
+            update();
+            draw();
+            requestAnimationFrame(loop);
         }
 
-        function clearCanvas() {
-            ctx.fillStyle = "#111";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function drawSnake() {
-            snake.forEach((part, index) => {
-                ctx.fillStyle = index === 0 ? "#4CAF50" : "#81C784";
-                ctx.fillRect(part.x * tileSize, part.y * tileSize, tileSize - 2, tileSize - 2);
-            });
-        }
-
-        function moveSnake() {
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-            snake.unshift(head);
-
-            if (head.x === food.x && head.y === food.y) {
-                score += 10;
-                document.getElementById("score").innerText = "Puntuación: " + score;
-                generateFood();
-            } else {
-                snake.pop();
-            }
-        }
-
-        function generateFood() {
-            food.x = Math.floor(Math.random() * tileCount);
-            food.y = Math.floor(Math.random() * tileCount);
-            snake.forEach(part => {
-                if (part.x === food.x && part.y === food.y) {
-                    generateFood();
-                }
-            });
-        }
-
-        function drawFood() {
-            ctx.fillStyle = "#FF5252";
-            ctx.fillRect(food.x * tileSize, food.y * tileSize, tileSize - 2, tileSize - 2);
-        }
-
-        function changeDirection(event) {
-            const keyPressed = event.keyCode;
-            const LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40;
-
-            if (changingDirection) return;
-
-            if (keyPressed === LEFT && dx === 0) { dx = -1; dy = 0; changingDirection = true; }
-            if (keyPressed === UP && dy === 0) { dx = 0; dy = -1; changingDirection = true; }
-            if (keyPressed === RIGHT && dx === 0) { dx = 1; dy = 0; changingDirection = true; }
-            if (keyPressed === DOWN && dy === 0) { dx = 0; dy = 1; changingDirection = true; }
-        }
-
-        function hasGameEnded() {
-            for (let i = 4; i < snake.length; i++) {
-                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
-            }
-            return snake[0].x < 0 || snake[0].x >= tileCount || snake[0].y < 0 || snake[0].y >= tileCount;
-        }
-
-        function resetGame() {
-            snake = [
-                { x: 10, y: 10 },
-                { x: 9, y: 10 },
-                { x: 8, y: 10 }
-            ];
-            dx = 1;
-            dy = 0;
-            score = 0;
-            document.getElementById("score").innerText = "Puntuación: " + score;
-            generateFood();
-        }
+        // Iniciar juego por primera vez
+        startGame();
     </script>
 </body>
 </html>
 """
 
-# Renderizar el juego en Streamlit
-components.html(game_code, height=480)
+# Renderizar el juego en Streamlit con altura para el canvas vertical
+components.html(airplane_game_code, height=580)
