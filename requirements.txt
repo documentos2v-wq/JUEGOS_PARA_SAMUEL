@@ -1,2 +1,1 @@
 streamlit
-streamlit-components-lib # (opcional, o podemos usar streamlit.components.v1)
