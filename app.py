@@ -3,15 +3,15 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Adivina la Palabra 2026 - Streamlit",
-    page_icon="🧩",
+    page_title="Dragon Ball Sudoku Z - Streamlit",
+    page_icon="🐉",
     layout="centered"
 )
 
-st.title("🧩 Adivina la Palabra Oculta")
-st.write("Pon a prueba tu agilidad mental. Lee la pista, selecciona las letras correctas antes de quedarte sin vidas y descubre la palabra secreta.")
+st.title("🐉 Dragon Ball Sudoku: ¡Entrenamiento Mental de Kaiō-sama!")
+st.write("Resuelve el Sudoku de 9x9 para dominar tu Ki. Llena las celdas vacías del 1 al 9 sin repetir números en filas, columnas ni bloques de 3x3.")
 
-# Código HTML, CSS y JS del juego de adivinar palabras
+# Código HTML, CSS y JS del Sudoku con temática Dragon Ball
 game_code = """
 <!DOCTYPE html>
 <html lang="es">
@@ -19,234 +19,251 @@ game_code = """
     <meta charset="utf-8">
     <style>
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
+            background-color: #0d1117;
+            color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             margin: 0;
-            padding: 15px;
+            padding: 10px;
         }
-        .game-card {
-            background: rgba(30, 41, 59, 0.85);
-            border: 2px solid #38bdf8;
-            padding: 20px;
-            border-radius: 14px;
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
-            width: 440px;
+        .container {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            border: 3px solid #f59e0b;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
             text-align: center;
         }
-        .stats {
+        .header-info {
             display: flex;
             justify-content: space-between;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 15px;
+            color: #f59e0b;
+            margin-bottom: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            margin: 0 auto 15px auto;
+            border: 3px solid #f59e0b;
+        }
+        td {
+            border: 1px solid #4b5563;
+            width: 38px;
+            height: 38px;
+            text-align: center;
+        }
+        /* Bordes gruesos para los bloques de 3x3 */
+        tr:nth-child(3) td, tr:nth-child(6) td {
+            border-bottom: 3px solid #f59e0b;
+        }
+        td:nth-child(3), td:nth-child(6) {
+            border-right: 3px solid #f59e0b;
+        }
+        input.sudoku-cell {
+            width: 100%;
+            height: 100%;
+            background: #1f2937;
             color: #38bdf8;
-        }
-        .clase-pista {
-            background: #1e293b;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 15px;
-            margin-bottom: 20px;
-            color: #cbd5e1;
-            border-left: 4px solid #38bdf8;
-        }
-        .word-display {
-            font-size: 32px;
-            letter-spacing: 12px;
+            font-size: 18px;
             font-weight: bold;
-            margin-bottom: 25px;
+            text-align: center;
+            border: none;
+            outline: none;
+        }
+        input.sudoku-cell:focus {
+            background: #374151;
             color: #f43f5e;
-            text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
         }
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            margin-bottom: 15px;
+        input.sudoku-cell.given {
+            color: #fde047;
+            background: #111827;
         }
-        .key-btn {
-            background: #334155;
-            color: #fff;
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .db-btn {
+            background: linear-gradient(45deg, #f59e0b, #ef4444);
+            color: #ffffff;
             border: none;
-            padding: 10px 0;
-            font-size: 14px;
+            padding: 8px 16px;
             font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-        .key-btn:hover:not(:disabled) {
-            background: #38bdf8;
-            color: #0f172a;
-        }
-        .key-btn:disabled {
-            background: #1e293b;
-            color: #64748b;
-            cursor: not-allowed;
-        }
-        #action-btn {
-            background: linear-gradient(45deg, #38bdf8, #2563eb);
-            color: #fff;
-            border: none;
-            padding: 10px 22px;
-            font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
-            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+            transition: 0.2s;
         }
-        #action-btn:hover {
+        .db-btn:hover {
             transform: scale(1.05);
+            background: linear-gradient(45deg, #fbbf24, #dc2626);
+        }
+        #message {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #38bdf8;
+            min-height: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="game-card">
-        <div class="stats">
-            <div id="score">Puntuación: 0</div>
-            <div id="lives">Vidas: ❤️❤️❤️❤️❤️</div>
+    <div class="container">
+        <div class="header-info">
+            <div>Dificultad: Nivel Super Saiyan</div>
+            <div id="status">Concentra tu Ki...</div>
         </div>
 
-        <div class="clase-pista" id="clasePista">Pista: Cargando...</div>
-        
-        <div class="word-display" id="wordDisplay">_ _ _ _</div>
+        <div id="sudoku-board"></div>
 
-        <div class="keyboard" id="keyboard"></div>
+        <div class="btn-group">
+            <button class="db-btn" onclick="checkSolution()">¡LIBERAR PODER (VERIFICAR)!</button>
+            <button class="db-btn" onclick="resetBoard()">REINICIAR TABLERO</button>
+        </div>
 
-        <button id="action-btn" onclick="nextWord()" style="display:none;">SIGUIENTE PALABRA</button>
+        <div id="message"></div>
     </div>
 
     <script>
-        const wordsList = [
-            { word: "PYTHON", hint: "Lenguaje de programación muy popular enfocado en IA y desarrollo." },
-            { word: "GITHUB", hint: "Plataforma de desarrollo y control de versiones en la nube." },
-            { word: "PROGRAMA", hint: "Conjunto de instrucciones que sigue una computadora para ejecutar tareas." },
-            { word: "STREAMLIT", hint: "Framework de Python para crear aplicaciones web de datos rápidamente." },
-            { word: "TECLADO", hint: "Periférico principal de entrada para escribir texto en un ordenador." },
-            { word: "INTERNET", hint: "Red global descentralizada de computadoras conectadas entre sí." },
-            { word: "ALGORITMO", hint: "Secuencia lógica de pasos finitos para resolver un problema." },
-            { word: "SERVIDOR", hint: "Computadora de alta potencia que procesa y aloja sitios web." },
-            { word: "SOFTWARE", hint: "Conjunto de programas, instrucciones y reglas informáticas." },
-            { word: "PANTALLA", hint: "Dispositivo donde se muestra la información visual de la computadora." }
+        // Tablero de ejemplo válido para Sudoku (0 representa celdas vacías)
+        const initialBoard = [
+            [5, 3, 0, 0, 7, 0, 0, 0, 0],
+            [6, 0, 0, 1, 9, 5, 0, 0, 0],
+            [0, 9, 8, 0, 0, 0, 0, 6, 0],
+            [8, 0, 0, 0, 6, 0, 0, 0, 3],
+            [4, 0, 0, 8, 0, 3, 0, 0, 1],
+            [7, 0, 0, 0, 2, 0, 0, 0, 6],
+            [0, 6, 0, 0, 0, 0, 2, 8, 0],
+            [0, 0, 0, 4, 1, 9, 0, 0, 5],
+            [0, 0, 0, 0, 8, 0, 0, 7, 9]
         ];
 
-        let currentItem = {};
-        let guessedLetters = [];
-        let lives = 5;
-        let score = 0;
-        let gameActive = true;
+        let currentBoard = JSON.parse(JSON.stringify(initialBoard));
 
-        const alphabet = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+        function renderBoard() {
+            const boardContainer = document.getElementById("sudoku-board");
+            boardContainer.innerHTML = "";
+            let table = document.createElement("table");
 
-        function initGame() {
-            // Seleccionar palabra aleatoria
-            currentItem = wordsList[Math.floor(Math.random() * wordsList.length)];
-            guessedLetters = [];
-            lives = 5;
-            gameActive = true;
-            document.getElementById("action-btn").style.display = "none";
-            
-            document.getElementById("clasePista").innerText = "Pista: " + currentItem.hint;
-            updateDisplay();
-            buildKeyboard();
-        }
+            for (let r = 0; r < 9; r++) {
+                let row = document.createElement("tr");
+                for (let c = 0; c < 9; c++) {
+                    let cell = document.createElement("td");
+                    let input = document.createElement("input");
+                    input.type = "text";
+                    input.maxLength = 1;
+                    input.className = "sudoku-cell";
 
-        function buildKeyboard() {
-            const kbContainer = document.getElementById("keyboard");
-            kbContainer.innerHTML = "";
-            for (let char of alphabet) {
-                let btn = document.createElement("button");
-                btn.classList.add("key-btn");
-                btn.innerText = char;
-                btn.id = "key-" + char;
-                btn.onclick = () => handleGuess(char);
-                kbContainer.appendChild(btn);
-            }
-        }
-
-        function handleGuess(letter) {
-            if (!gameActive) return;
-            guessedLetters.push(letter);
-            
-            let btn = document.getElementById("key-" + letter);
-            if (btn) btn.disabled = true;
-
-            if (currentItem.word.includes(letter)) {
-                // Acierto
-                if (btn) btn.style.background = "#22c55e";
-                updateDisplay();
-
-                // Verificar si ganó
-                let won = true;
-                for (let char of currentItem.word) {
-                    if (!guessedLetters.includes(char)) {
-                        won = false;
-                        break;
+                    if (initialBoard[r][c] !== 0) {
+                        input.value = initialBoard[r][c];
+                        input.disabled = true;
+                        input.classList.add("given");
+                    } else {
+                        input.value = currentBoard[r][c] !== 0 ? currentBoard[r][c] : "";
+                        input.oninput = (e) => {
+                            let val = parseInt(e.target.value);
+                            if (isNaN(val) || val < 1 || val > 9) {
+                                e.target.value = "";
+                                currentBoard[r][c] = 0;
+                            } else {
+                                currentBoard[r][c] = val;
+                            }
+                        };
                     }
+                    cell.appendChild(input);
+                    row.appendChild(cell);
                 }
+                table.appendChild(row);
+            }
+            boardContainer.appendChild(table);
+        }
 
-                if (won) {
-                    score += 50;
-                    document.getElementById("score").innerText = "Puntuación: " + score;
-                    document.getElementById("clasePista").innerText = "🎉 ¡EXCELENTE! ¡Has adivinado la palabra!";
-                    gameActive = false;
-                    document.getElementById("action-btn").style.display = "inline-block";
+        function checkSolution() {
+            // Recoger valores actuales de los inputs
+            const inputs = document.querySelectorAll(".sudoku-cell");
+            let index = 0;
+            let isComplete = true;
+
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    if (initialBoard[r][c] === 0) {
+                        let val = parseInt(inputs[index].value);
+                        if (isNaN(val)) {
+                            isComplete = false;
+                        }
+                        currentBoard[r][c] = isNaN(val) ? 0 : val;
+                    }
+                    index++;
                 }
+            }
+
+            let msg = document.getElementById("message");
+            if (!isComplete) {
+                msg.style.color = "#f43f5e";
+                msg.innerText = "⚠️ ¡Aún quedan celdas vacías! ¡El entrenamiento no ha terminado!";
+                return;
+            }
+
+            // Validar reglas básicas de filas, columnas y bloques
+            if (isValidSudoku(currentBoard)) {
+                msg.style.color = "#22c55e";
+                msg.innerText = "🐉 ¡Increíble! ¡Has alcanzado el estado Super Saiyan Blue perfecto!";
             } else {
-                // Fallo
-                if (btn) btn.style.background = "#ef4444";
-                lives--;
-                updateDisplay();
+                msg.style.color = "#f43f5e";
+                msg.innerText = "❌ ¡Hay errores en el flujo de Ki! Revisa los números repetidos.";
+            }
+        }
 
-                if (lives <= 0) {
-                    document.getElementById("clasePista").innerText = "❌ ¡Game Over! La palabra era: " + currentItem.word;
-                    // Revelar palabra completa
-                    let displayStr = "";
-                    for (let char of currentItem.word) {
-                        displayStr += char + " ";
+        function isValidSudoku(board) {
+            for (let i = 0; i < 9; i++) {
+                let rowSet = new Set();
+                let colSet = new Set();
+                let boxSet = new Set();
+
+                for (let j = 0; j < 9; j++) {
+                    // Fila
+                    let rVal = board[i][j];
+                    if (rVal !== 0) {
+                        if (rowSet.has(rVal)) return false;
+                        rowSet.add(rVal);
                     }
-                    document.getElementById("wordDisplay").innerText = displayStr.trim();
-                    gameActive = false;
-                    document.getElementById("action-btn").style.display = "inline-block";
-                    document.getElementById("action-btn").innerText = "JUGAR OTRA VEZ";
+                    // Columna
+                    let cVal = board[j][i];
+                    if (cVal !== 0) {
+                        if (colSet.has(cVal)) return false;
+                        colSet.add(cVal);
+                    }
+                    // Bloque 3x3
+                    let rowIndex = 3 * Math.floor(i / 3) + Math.floor(j / 3);
+                    let colIndex = 3 * (i % 3) + (j % 3);
+                    let bVal = board[rowIndex][colIndex];
+                    if (bVal !== 0) {
+                        if (boxSet.has(bVal)) return false;
+                        boxSet.add(bVal);
+                    }
                 }
             }
+            return true;
         }
 
-        function updateDisplay() {
-            let displayStr = "";
-            for (let char of currentItem.word) {
-                if (guessedLetters.includes(char)) {
-                    displayStr += char + " ";
-                } else {
-                    displayStr += "_ ";
-                }
-            }
-            document.getElementById("wordDisplay").innerText = displayStr.trim();
-
-            let hearts = "";
-            for (let i = 0; i < lives; i++) hearts += "❤️";
-            document.getElementById("lives").innerText = "Vidas: " + hearts;
+        function resetBoard() {
+            currentBoard = JSON.parse(JSON.stringify(initialBoard));
+            document.getElementById("message.innerText") = "";
+            renderBoard();
+            document.getElementById("message").innerText = "🔄 Tablero reiniciado. ¡Vuelve a concentrarte!";
         }
 
-        function nextWord() {
-            if(lives <= 0) score = 0; // Reiniciar score si perdió
-            initGame();
-        }
-
-        // Arrancar al cargar
-        initGame();
+        renderBoard();
     </script>
 </body>
 </html>
 """
 
-# Renderizar la aplicación en Streamlit
-components.html(game_code, height=500)
+# Renderizar en Streamlit
+components.html(game_code, height=580)
