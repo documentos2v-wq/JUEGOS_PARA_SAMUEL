@@ -8,10 +8,10 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🐉 Dragon Ball Sudoku: ¡Entrenamiento Mental de Kaiō-sama!")
-st.write("Resuelve el Sudoku de 9x9 para dominar tu Ki. Llena las celdas vacías del 1 al 9 sin repetir números en filas, columnas ni bloques de 3x3.")
+st.title("🐉 Dragon Ball Sudoku: ¡Entrenamiento de Kaiō-sama!")
+st.write("Domina tu Ki resolviendo este Sudoku. Completa el tablero sin repetir números del 1 al 9 en filas, columnas ni bloques de 3x3.")
 
-# Código HTML, CSS y JS del Sudoku con temática Dragon Ball
+# Código HTML, CSS y JS rediseñado con alta calidad visual
 game_code = """
 <!DOCTYPE html>
 <html lang="es">
@@ -19,7 +19,7 @@ game_code = """
     <meta charset="utf-8">
     <style>
         body {
-            background-color: #0d1117;
+            background-color: #0b0f19;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -30,12 +30,13 @@ game_code = """
             padding: 10px;
         }
         .container {
-            background: linear-gradient(135deg, #1f2937, #111827);
-            border: 3px solid #f59e0b;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border: 3px solid #fbbf24;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 0 35px rgba(251, 191, 36, 0.35);
             text-align: center;
+            max-width: 420px;
         }
         .header-info {
             display: flex;
@@ -43,72 +44,80 @@ game_code = """
             font-size: 14px;
             font-weight: bold;
             color: #f59e0b;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         table {
             border-collapse: collapse;
-            margin: 0 auto 15px auto;
-            border: 3px solid #f59e0b;
+            margin: 0 auto 20px auto;
+            border: 4px solid #f59e0b;
+            background-color: #020617;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
         td {
-            border: 1px solid #4b5563;
-            width: 38px;
-            height: 38px;
+            border: 1px solid #334155;
+            width: 40px;
+            height: 40px;
             text-align: center;
         }
         /* Bordes gruesos para los bloques de 3x3 */
         tr:nth-child(3) td, tr:nth-child(6) td {
-            border-bottom: 3px solid #f59e0b;
+            border-bottom: 4px solid #f59e0b;
         }
         td:nth-child(3), td:nth-child(6) {
-            border-right: 3px solid #f59e0b;
+            border-right: 4px solid #f59e0b;
         }
         input.sudoku-cell {
             width: 100%;
             height: 100%;
-            background: #1f2937;
+            background: transparent;
             color: #38bdf8;
-            font-size: 18px;
+            font-size: 19px;
             font-weight: bold;
             text-align: center;
             border: none;
             outline: none;
         }
         input.sudoku-cell:focus {
-            background: #374151;
+            background: rgba(56, 189, 248, 0.15);
             color: #f43f5e;
         }
         input.sudoku-cell.given {
             color: #fde047;
-            background: #111827;
+            background: rgba(253, 224, 71, 0.05);
+            text-shadow: 0 0 8px rgba(253, 224, 71, 0.4);
         }
         .btn-group {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
         }
         .db-btn {
             background: linear-gradient(45deg, #f59e0b, #ef4444);
             color: #ffffff;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 18px;
             font-weight: bold;
             font-size: 13px;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
             transition: 0.2s;
+            text-transform: uppercase;
         }
         .db-btn:hover {
             transform: scale(1.05);
             background: linear-gradient(45deg, #fbbf24, #dc2626);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.7);
         }
         #message {
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 15px;
+            font-size: 15px;
             font-weight: bold;
             color: #38bdf8;
-            min-height: 20px;
+            min-height: 24px;
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
         }
     </style>
 </head>
@@ -116,22 +125,21 @@ game_code = """
 
     <div class="container">
         <div class="header-info">
-            <div>Dificultad: Nivel Super Saiyan</div>
-            <div id="status">Concentra tu Ki...</div>
+            <div>🔥 Nivel Saiyan</div>
+            <div id="status">Ki Estable</div>
         </div>
 
         <div id="sudoku-board"></div>
 
         <div class="btn-group">
-            <button class="db-btn" onclick="checkSolution()">¡LIBERAR PODER (VERIFICAR)!</button>
-            <button class="db-btn" onclick="resetBoard()">REINICIAR TABLERO</button>
+            <button class="db-btn" onclick="checkSolution()">¡Liberar Poder!</button>
+            <button class="db-btn" onclick="resetBoard()">Reiniciar</button>
         </div>
 
         <div id="message"></div>
     </div>
 
     <script>
-        // Tablero de ejemplo válido para Sudoku (0 representa celdas vacías)
         const initialBoard = [
             [5, 3, 0, 0, 7, 0, 0, 0, 0],
             [6, 0, 0, 1, 9, 5, 0, 0, 0],
@@ -185,7 +193,6 @@ game_code = """
         }
 
         function checkSolution() {
-            // Recoger valores actuales de los inputs
             const inputs = document.querySelectorAll(".sudoku-cell");
             let index = 0;
             let isComplete = true;
@@ -206,17 +213,16 @@ game_code = """
             let msg = document.getElementById("message");
             if (!isComplete) {
                 msg.style.color = "#f43f5e";
-                msg.innerText = "⚠️ ¡Aún quedan celdas vacías! ¡El entrenamiento no ha terminado!";
+                msg.innerText = "⚠️ ¡Celdas vacías! ¡Entrena más duro!";
                 return;
             }
 
-            // Validar reglas básicas de filas, columnas y bloques
             if (isValidSudoku(currentBoard)) {
                 msg.style.color = "#22c55e";
-                msg.innerText = "🐉 ¡Increíble! ¡Has alcanzado el estado Super Saiyan Blue perfecto!";
+                msg.innerText = "🐉 ¡Impresionante! ¡Super Saiyan Blue alcanzado!";
             } else {
                 msg.style.color = "#f43f5e";
-                msg.innerText = "❌ ¡Hay errores en el flujo de Ki! Revisa los números repetidos.";
+                msg.innerText = "❌ ¡Inestabilidad de Ki! Hay números repetidos.";
             }
         }
 
@@ -227,19 +233,16 @@ game_code = """
                 let boxSet = new Set();
 
                 for (let j = 0; j < 9; j++) {
-                    // Fila
                     let rVal = board[i][j];
                     if (rVal !== 0) {
                         if (rowSet.has(rVal)) return false;
                         rowSet.add(rVal);
                     }
-                    // Columna
                     let cVal = board[j][i];
                     if (cVal !== 0) {
                         if (colSet.has(cVal)) return false;
                         colSet.add(cVal);
                     }
-                    // Bloque 3x3
                     let rowIndex = 3 * Math.floor(i / 3) + Math.floor(j / 3);
                     let colIndex = 3 * (i % 3) + (j % 3);
                     let bVal = board[rowIndex][colIndex];
@@ -254,9 +257,8 @@ game_code = """
 
         function resetBoard() {
             currentBoard = JSON.parse(JSON.stringify(initialBoard));
-            document.getElementById("message.innerText") = "";
             renderBoard();
-            document.getElementById("message").innerText = "🔄 Tablero reiniciado. ¡Vuelve a concentrarte!";
+            document.getElementById("message").innerText = "🔄 Tablero restaurado. ¡Concéntrate!";
         }
 
         renderBoard();
