@@ -1,46 +1,49 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+# Configuración de la página
+st.set_page_config(
+    page_title="Juego de la Culebrita - Streamlit",
+    page_icon="🐍",
+    layout="centered"
+)
+
+st.title("🐍 Culebrita Retro en Streamlit")
+st.write("Usa las **flechas del teclado** dentro del recuadro del juego para mover la serpiente y comer la manzana roja.")
+
+# Código HTML/JS incrustado para que el juego corra perfectamente en Streamlit
+snake_game_html = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de la Culebrita - Snake</title>
     <style>
         body {
-            background-color: #1a1a1a;
+            background-color: #0e1117;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             margin: 0;
-        }
-        h1 {
-            margin-bottom: 5px;
+            padding: 10px;
         }
         #score {
-            font-size: 24px;
-            margin-bottom: 15px;
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
         canvas {
-            border: 4px solid #4CAF50;
+            border: 3px solid #4CAF50;
             background-color: #111;
-            box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
-        }
-        .instructions {
-            margin-top: 15px;
-            color: #aaa;
-            font-size: 14px;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
         }
     </style>
 </head>
 <body>
-
-    <h1>Culebrita Retro</h1>
     <div id="score">Puntuación: 0</div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <div class="instructions">Usa las <strong>flechas del teclado</strong> para moverte.</div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -58,8 +61,6 @@
         let changingDirection = false;
 
         document.addEventListener("keydown", changeDirection);
-
-        // Iniciar juego
         startGame();
 
         function startGame() {
@@ -69,7 +70,7 @@
 
         function main() {
             if (hasGameEnded()) {
-                alert("¡Juego terminado! Tu puntuación fue: " + score);
+                alert("¡Juego terminado! Puntuación final: " + score);
                 resetGame();
                 return;
             }
@@ -108,8 +109,6 @@
         function generateFood() {
             food.x = Math.floor(Math.random() * tileCount);
             food.y = Math.floor(Math.random() * tileCount);
-            
-            // Evitar que la comida aparezca sobre la serpiente
             snake.forEach(part => {
                 if (part.x === food.x && part.y === food.y) {
                     generateFood();
@@ -124,41 +123,21 @@
 
         function changeDirection(event) {
             const keyPressed = event.keyCode;
-            const LEFT = 37;
-            const UP = 38;
-            const RIGHT = 39;
-            const DOWN = 40;
+            const LEFT = 37, UP = 38, RIGHT = 39, DOWN = 40;
 
             if (changingDirection) return;
 
-            if (keyPressed === LEFT && dx === 0) {
-                dx = -1; dy = 0;
-                changingDirection = true;
-            }
-            if (keyPressed === UP && dy === 0) {
-                dx = 0; dy = -1;
-                changingDirection = true;
-            }
-            if (keyPressed === RIGHT && dx === 0) {
-                dx = 1; dy = 0;
-                changingDirection = true;
-            }
-            if (keyPressed === DOWN && dy === 0) {
-                dx = 0; dy = 1;
-                changingDirection = true;
-            }
+            if (keyPressed === LEFT && dx === 0) { dx = -1; dy = 0; changingDirection = true; }
+            if (keyPressed === UP && dy === 0) { dx = 0; dy = -1; changingDirection = true; }
+            if (keyPressed === RIGHT && dx === 0) { dx = 1; dy = 0; changingDirection = true; }
+            if (keyPressed === DOWN && dy === 0) { dx = 0; dy = 1; changingDirection = true; }
         }
 
         function hasGameEnded() {
             for (let i = 4; i < snake.length; i++) {
                 if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
             }
-            const hitLeftWall = snake[0].x < 0;
-            const hitRightWall = snake[0].x >= tileCount;
-            const hitToptWall = snake[0].y < 0;
-            const hitBottomWall = snake[0].y >= tileCount;
-
-            return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
+            return snake[0].x < 0 || snake[0].x >= tileCount || snake[0].y < 0 || snake[0].y >= tileCount;
         }
 
         function resetGame() {
@@ -172,3 +151,7 @@
     </script>
 </body>
 </html>
+"""
+
+# Renderizar el juego dentro de Streamlit con altura ajustada
+components.html(snake_game_html, height=480)
