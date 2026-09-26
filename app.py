@@ -3,25 +3,25 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Juego de Avioncitos - Streamlit",
-    page_icon="✈️",
+    page_title="Drone Delivery 2026 - Streamlit",
+    page_icon="🛸",
     layout="centered"
 )
 
-st.title("✈️ Batalla de Avioncitos Retro")
-st.write("Haz clic dentro del cuadro, usa las **flechas izquierda y derecha** para mover tu avioncito y esquiva los meteoritos.")
+st.title("🛸 Drone Delivery 2026: Quantum Flight")
+st.write("Pilota el dron de reparto autónomo de última generación. Esquiva los satélites en órbita y las tormentas de datos cibernéticos.")
 
-# Código HTML y JavaScript del juego de avioncitos
-airplane_game_code = """
+# Código HTML, CSS y JS con temática 2026 y Botón de Inicio
+game_code = """
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <style>
         body {
-            background-color: #0e1117;
-            color: white;
-            font-family: Arial, sans-serif;
+            background-color: #0b0f19;
+            color: #00ffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -29,152 +29,224 @@ airplane_game_code = """
             margin: 0;
             padding: 10px;
         }
-        #score {
-            font-size: 20px;
+        #ui-container {
+            display: flex;
+            justify-content: space-between;
+            width: 400px;
             margin-bottom: 10px;
+            align-items: center;
+        }
+        #score, #level {
+            font-size: 16px;
             font-weight: bold;
+            color: #00ffcc;
+            text-shadow: 0 0 8px rgba(0,255,204,0.5);
+        }
+        #start-btn {
+            background: linear-gradient(45deg, #00ffff, #0077ff);
+            color: #0b0f19;
+            border: none;
+            padding: 8px 18px;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(0,255,255,0.6);
+            transition: 0.2s;
+        }
+        #start-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(45deg, #ffffff, #00ffff);
         }
         canvas {
-            border: 3px solid #00bcd4;
-            background-color: #050515;
+            border: 2px solid #00ffff;
+            background: radial-gradient(circle at center, #111e38 0%, #050811 100%);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+            border-radius: 8px;
             outline: none;
         }
     </style>
 </head>
 <body>
-    <div id="score">Puntuación: 0</div>
+    <div id="ui-container">
+        <div id="score">Puntuación: 0</div>
+        <button id="start-btn" onclick="initGame()">INICIAR VUELO</button>
+        <div id="level">Nivel: 1</div>
+    </div>
+    
     <canvas id="gameCanvas" width="400" height="500" tabindex="1"></canvas>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        canvas.focus();
-
         let score = 0;
-        let isGameOver = false;
+        let level = 1;
+        let isPlaying = false;
+        let gameInterval;
 
-        // Propiedades del avión del jugador
-        let plane = {
-            x: 180,
-            y: 420,
-            width: 40,
-            height: 40,
-            speed: 6
+        // Dron del jugador (Tecnología 2026)
+        let drone = {
+            x: 175,
+            y: 410,
+            width: 50,
+            height: 35,
+            speed: 7
         };
 
-        // Obstáculos (meteoritos)
         let obstacles = [];
+        let particles = [];
         let obstacleTimer = 0;
-
-        // Controles del teclado
         let keys = {};
-        window.addEventListener("keydown", (e) => { keys[e.code] = true; });
+
+        window.addEventListener("keydown", (e) => { 
+            if(["ArrowLeft","ArrowRight","KeyA","KeyD","Space"].includes(e.code)) {
+                e.preventDefault(); 
+            }
+            keys[e.code] = true; 
+        });
         window.addEventListener("keyup", (e) => { keys[e.code] = false; });
 
-        function startGame() {
+        function initGame() {
             score = 0;
+            level = 1;
             obstacles = [];
-            isGameOver = false;
-            plane.x = 180;
-            loop();
+            particles = [];
+            drone.x = 175;
+            obstacleTimer = 0;
+            isPlaying = true;
+            document.getElementById("start-btn").style.display = "none";
+            canvas.focus();
+            
+            if(gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(updateAndDraw, 1000 / 60); // 60 FPS fluidos
         }
 
-        function update() {
-            if (isGameOver) return;
+        function spawnObstacle() {
+            let width = 35 + Math.random() * 25;
+            let x = Math.random() * (canvas.width - width);
+            let speed = 4 + level * 0.8; // Aumenta la velocidad según el nivel del 2026
+            obstacles.push({ x: x, y: -45, width: width, height: 25, speed: speed });
+        }
 
-            // Movimiento del avión
-            if ((keys["ArrowLeft"] || keys["KeyA"]) && plane.x > 0) {
-                plane.x -= plane.speed;
+        function createExplosion(x, y) {
+            for(let i = 0; i < 25; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    life: 30,
+                    color: Math.random() > 0.5 ? '#00ffff' : '#ff0055'
+                });
             }
-            if ((keys["ArrowRight"] || keys["KeyD"]) && plane.x + plane.width < canvas.width) {
-                plane.x += plane.speed;
+        }
+
+        function updateAndDraw() {
+            if (!isPlaying) return;
+
+            // --- LÓGICA DE MOVIMIENTO ---
+            if ((keys["ArrowLeft"] || keys["KeyA"]) && drone.x > 0) {
+                drone.x -= drone.speed;
+            }
+            if ((keys["ArrowRight"] || keys["KeyD"]) && drone.x + drone.width < canvas.width) {
+                drone.x += drone.speed;
             }
 
-            // Generar obstáculos
+            // Generador de obstáculos dinámico
             obstacleTimer++;
-            if (obstacleTimer > 40) {
-                let obsX = Math.random() * (canvas.width - 35);
-                obstacles.push({ x: obsX, y: -40, width: 35, height: 35, speed: 4 + Math.random() * 3 });
+            let spawnRate = Math.max(25, 55 - (level * 5));
+            if (obstacleTimer > spawnRate) {
+                spawnObstacle();
                 obstacleTimer = 0;
             }
 
-            // Mover obstáculos y detectar colisiones
+            // Actualizar obstáculos (Satélites / Ciber-amenazas)
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 let obs = obstacles[i];
                 obs.y += obs.speed;
 
-                // Colisión con el avión
+                // Colisión con el dron
                 if (
-                    plane.x < obs.x + obs.width &&
-                    plane.x + plane.width > obs.x &&
-                    plane.y < obs.y + obs.height &&
-                    plane.y + plane.height > obs.y
+                    drone.x < obs.x + obs.width &&
+                    drone.x + drone.width > obs.x &&
+                    drone.y < obs.y + obs.height &&
+                    drone.y + drone.height > obs.y
                 ) {
-                    isGameOver = true;
+                    isPlaying = false;
+                    createExplosion(drone.x + drone.width/2, drone.y + drone.height/2);
+                    setTimeout(() => {
+                        alert("⚠️ ¡Colisión detectada! Sistema de vuelo interrumpido. Puntuación final: " + score);
+                        document.getElementById("start-btn").style.display = "block";
+                        document.getElementById("start-btn").innerText = "VOLVER A INTENTAR";
+                    }, 100);
                 }
 
-                // Eliminar obstáculos fuera de la pantalla y sumar puntos
+                // Puntuación y eliminación
                 if (obs.y > canvas.height) {
                     obstacles.splice(i, 1);
-                    score += 10;
+                    score += 15;
+                    // Subir de nivel cada 100 puntos
+                    level = Math.floor(score / 100) + 1;
                 }
             }
-        }
 
-        function draw() {
-            // Limpiar pantalla
-            ctx.fillStyle = "#050515";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // --- RENDERIZADO GRÁFICO (Estilo Neón 2026) ---
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar estrellas de fondo
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(50, 50, 2, 2);
-            ctx.fillRect(150, 120, 2, 2);
-            ctx.fillRect(300, 80, 2, 2);
-            ctx.fillRect(250, 300, 2, 2);
-            ctx.fillRect(80, 400, 2, 2);
-
-            // Dibujar Avioncito (Diseño simple en canvas)
-            ctx.fillStyle = "#00bcd4";
-            // Cuerpo del avión
-            ctx.fillRect(plane.x + 15, plane.y, 10, 40);
-            // Alas
-            ctx.fillStyle = "#ffeb3b";
-            ctx.fillRect(plane.x, plane.y + 15, 40, 10);
-            // Cabina
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(plane.x + 16, plane.y + 10, 8, 12);
-
-            // Dibujar obstáculos (Meteoritos)
-            ctx.fillStyle = "#ff5722";
-            obstacles.forEach(obs => {
-                ctx.beginPath();
-                ctx.arc(obs.x + obs.width / 2, obs.y + obs.height / 2, obs.width / 2, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            // Actualizar marcador
-            document.getElementById("score").innerText = "Puntuación: " + score;
-        }
-
-        function loop() {
-            if (isGameOver) {
-                alert("¡Game Over! Te estrellaste. Puntuación final: " + score);
-                startGame();
-                return;
+            // Fondo con rejilla cibernética sutil
+            ctx.strokeStyle = "rgba(0, 255, 255, 0.04)";
+            ctx.lineWidth = 1;
+            for(let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
             }
-            update();
-            draw();
-            requestAnimationFrame(loop);
+
+            // Dibujar Dron Tecnológico 2026
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = "#00ffff";
+            ctx.fillStyle = "#00ffff";
+            // Chasis central
+            ctx.fillRect(drone.x + 10, drone.y + 10, 30, 15);
+            // Propulsores laterales neón
+            ctx.fillStyle = "#ff0055";
+            ctx.fillRect(drone.x, drone.y + 5, 10, 8);
+            ctx.fillRect(drone.x + 40, drone.y + 5, 10, 8);
+            // Núcleo de energía central
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(drone.x + 20, drone.y + 13, 10, 9);
+            ctx.shadowBlur = 0; // Reset sombra
+
+            // Dibujar Obstáculos (Satélites / Ciber-bloques)
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#ff0055";
+            ctx.fillStyle = "#ff0055";
+            obstacles.forEach(obs => {
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                // Detalles internos del satélite
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(obs.x + 5, obs.y + 5, obs.width - 10, 4);
+                ctx.fillStyle = "#ff0055";
+            });
+            ctx.shadowBlur = 0;
+
+            // Actualizar HUD de textos
+            document.getElementById("score").innerText = "Puntuación: " + score;
+            document.getElementById("level").innerText = "Nivel: " + level;
         }
 
-        // Iniciar juego por primera vez
-        startGame();
+        // Renderizado estático inicial antes de empezar
+        function drawStatic() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ffff";
+            ctx.font = "16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Presiona 'INICIAR VUELO' para comenzar", canvas.width / 2, canvas.height / 2);
+        }
+        drawStatic();
     </script>
 </body>
 </html>
 """
 
-# Renderizar el juego en Streamlit con altura para el canvas vertical
-components.html(airplane_game_code, height=580)
+# Renderizar en Streamlit
+components.html(game_code, height=580)
