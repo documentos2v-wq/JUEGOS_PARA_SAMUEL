@@ -9,19 +9,19 @@ st.set_page_config(
 )
 
 st.title("🐍 Culebrita Retro en Streamlit")
-st.write("Usa las **flechas del teclado** dentro del recuadro del juego para mover la serpiente y comer la manzana roja.")
+st.write("Usa las **flechas del teclado** dentro del recuadro para mover la serpiente.")
 
-# Código HTML/JS incrustado para que el juego corra perfectamente en Streamlit
-snake_game_html = """
+# Código HTML y JavaScript del juego encapsulado
+game_code = """
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <style>
         body {
             background-color: #0e1117;
-            color: #ffffff;
-            font-family: sans-serif;
+            color: white;
+            font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -37,7 +37,6 @@ snake_game_html = """
         canvas {
             border: 3px solid #4CAF50;
             background-color: #111;
-            box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
         }
     </style>
 </head>
@@ -153,5 +152,5 @@ snake_game_html = """
 </html>
 """
 
-# Renderizar el juego dentro de Streamlit con altura ajustada
-components.html(snake_game_html, height=480)
+# Renderizar el juego en Streamlit
+components.html(game_code, height=480)
