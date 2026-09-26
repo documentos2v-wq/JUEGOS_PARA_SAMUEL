@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de la Culebrita - Snake</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 5px;
+        }
+        #score {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        canvas {
+            border: 4px solid #4CAF50;
+            background-color: #111;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+        }
+        .instructions {
+            margin-top: 15px;
+            color: #aaa;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Culebrita Retro</h1>
+    <div id="score">Puntuación: 0</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="instructions">Usa las <strong>flechas del teclado</strong> para moverte.</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const tileSize = 20;
+        const tileCount = canvas.width / tileSize;
+
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 5, y: 5 };
+        let dx = 0;
+        let dy = 0;
+        let score = 0;
+        let gameInterval;
+        let changingDirection = false;
+
+        document.addEventListener("keydown", changeDirection);
+
+        // Iniciar juego
+        startGame();
+
+        function startGame() {
+            resetGame();
+            gameInterval = setInterval(main, 100);
+        }
+
+        function main() {
+            if (hasGameEnded()) {
+                alert("¡Juego terminado! Tu puntuación fue: " + score);
+                resetGame();
+                return;
+            }
+            changingDirection = false;
+            clearCanvas();
+            drawFood();
+            moveSnake();
+            drawSnake();
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = "#111";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawSnake() {
+            snake.forEach((part, index) => {
+                ctx.fillStyle = index === 0 ? "#4CAF50" : "#81C784";
+                ctx.fillRect(part.x * tileSize, part.y * tileSize, tileSize - 2, tileSize - 2);
+            });
+        }
+
+        function moveSnake() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                document.getElementById("score").innerText = "Puntuación: " + score;
+                generateFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function generateFood() {
+            food.x = Math.floor(Math.random() * tileCount);
+            food.y = Math.floor(Math.random() * tileCount);
+            
+            // Evitar que la comida aparezca sobre la serpiente
+            snake.forEach(part => {
+                if (part.x === food.x && part.y === food.y) {
+                    generateFood();
+                }
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = "#FF5252";
+            ctx.fillRect(food.x * tileSize, food.y * tileSize, tileSize - 2, tileSize - 2);
+        }
+
+        function changeDirection(event) {
+            const keyPressed = event.keyCode;
+            const LEFT = 37;
+            const UP = 38;
+            const RIGHT = 39;
+            const DOWN = 40;
+
+            if (changingDirection) return;
+
+            if (keyPressed === LEFT && dx === 0) {
+                dx = -1; dy = 0;
+                changingDirection = true;
+            }
+            if (keyPressed === UP && dy === 0) {
+                dx = 0; dy = -1;
+                changingDirection = true;
+            }
+            if (keyPressed === RIGHT && dx === 0) {
+                dx = 1; dy = 0;
+                changingDirection = true;
+            }
+            if (keyPressed === DOWN && dy === 0) {
+                dx = 0; dy = 1;
+                changingDirection = true;
+            }
+        }
+
+        function hasGameEnded() {
+            for (let i = 4; i < snake.length; i++) {
+                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
+            }
+            const hitLeftWall = snake[0].x < 0;
+            const hitRightWall = snake[0].x >= tileCount;
+            const hitToptWall = snake[0].y < 0;
+            const hitBottomWall = snake[0].y >= tileCount;
+
+            return hitLeftWall || hitRightWall || hitToptWall || hitBottomWall;
+        }
+
+        function resetGame() {
+            snake = [{ x: 10, y: 10 }];
+            dx = 1;
+            dy = 0;
+            score = 0;
+            document.getElementById("score").innerText = "Puntuación: " + score;
+            generateFood();
+        }
+    </script>
+</body>
+</html>
