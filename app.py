@@ -1,31 +1,37 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
-# Configuración de la página en pantalla completa
+# Configuración de la página para ocupar todo el ancho
 st.set_page_config(
-    page_title="Reto Mental Capcioso - Streamlit",
+    page_title="Reto Mental Capcioso",
     page_icon="🧠",
     layout="wide"
 )
 
-# Ocultar la barra superior y márgenes predeterminados de Streamlit para una experiencia inmersiva total
-hide_streamlit_style = """
-<style>
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
-.block-container {
-    padding-top: 0rem;
-    padding-bottom: 0rem;
-    padding-left: 0rem;
-    padding-right: 0rem;
-}
-</style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# Estilo para quitar los márgenes por defecto de Streamlit y forzar pantalla negra total
+st.markdown("""
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .block-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+    iframe {
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 999999 !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# Código HTML, CSS y JS con diseño a pantalla completa y letras grandes
-game_code = """
+# Código HTML y JS incrustado con diseño responsivo a pantalla completa real
+game_html = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -34,6 +40,8 @@ game_code = """
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         body {
             background-color: #000000;
@@ -41,61 +49,59 @@ game_code = """
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
+            justify-content: space-between;
             width: 100vw;
             height: 100vh;
+            padding: 30px 40px;
             overflow: hidden;
-        }
-        .container-fullscreen {
-            background: #050505;
-            width: 100%;
-            height: 100%;
-            max-width: 900px;
-            max-height: 650px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 30px;
-            border-radius: 16px;
-            border: 2px solid #38bdf8;
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.25);
         }
         .stats {
             display: flex;
             justify-content: space-between;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             color: #38bdf8;
             border-bottom: 2px solid #1e293b;
             padding-bottom: 15px;
+            width: 100%;
+        }
+        .question-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
         }
         .question-box {
             background: #0f172a;
-            padding: 25px;
-            border-radius: 12px;
-            font-size: 24px;
+            padding: 30px;
+            border-radius: 14px;
+            font-size: 26px;
             color: #ffffff;
             border-left: 6px solid #f59e0b;
             line-height: 1.5;
             text-align: center;
-            margin: 15px 0;
+            margin-bottom: 25px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         .options-container {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
         }
         .option-btn {
             background: #1e293b;
             color: white;
             border: 2px solid #334155;
-            padding: 18px 20px;
-            font-size: 19px;
+            padding: 20px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             transition: 0.2s;
             text-align: left;
@@ -113,20 +119,23 @@ game_code = """
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: 50px;
+            width: 100%;
+            min-height: 60px;
+            border-top: 2px solid #1e293b;
+            padding-top: 15px;
         }
         #feedback {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
         }
         #next-btn {
             background: linear-gradient(45deg, #22c55e, #16a34a);
             color: white;
             border: none;
-            padding: 14px 30px;
+            padding: 14px 35px;
             font-size: 18px;
             font-weight: bold;
-            border-radius: 25px;
+            border-radius: 30px;
             cursor: pointer;
             box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
             display: none;
@@ -138,20 +147,19 @@ game_code = """
 </head>
 <body>
 
-    <div class="container-fullscreen">
-        <div class="stats">
-            <div id="score">Aciertos: 0</div>
-            <div id="remaining">Restantes: 0</div>
-        </div>
+    <div class="stats">
+        <div id="score">Aciertos: 0</div>
+        <div id="remaining">Restantes: 0</div>
+    </div>
 
+    <div class="question-container">
         <div class="question-box" id="questionText">Cargando desafío mental...</div>
-
         <div class="options-container" id="optionsContainer"></div>
+    </div>
 
-        <div class="footer-area">
-            <div id="feedback"></div>
-            <button id="next-btn" onclick="loadNextQuestion()">Siguiente Reto 🚀</button>
-        </div>
+    <div class="footer-area">
+        <div id="feedback"></div>
+        <button id="next-btn" onclick="loadNextQuestion()">Siguiente Reto 🚀</button>
     </div>
 
     <script>
@@ -299,5 +307,5 @@ game_code = """
 </html>
 """
 
-# Renderizar a pantalla completa con altura amplia en Streamlit
-components.html(game_code, height=650)
+# Renderizar utilizando pantalla completa real mediante iframe fijo
+st.components.v1.html(game_html, height=800, scrolling=False)
