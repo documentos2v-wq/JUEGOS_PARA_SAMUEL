@@ -3,15 +3,15 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Dino T-Rex Game 2026 - Streamlit",
+    page_title="Dino T-Rex HD 3D - Streamlit",
     page_icon="🦖",
     layout="centered"
 )
 
-st.title("🦖 Dinosaurio de Google: Edición Nocturna")
-st.write("Presiona la **Barra Espaciadora** o la **Flecha Arriba** para saltar sobre los cactus y descansar un rato antes de dormir.")
+st.title("🦖 Dinosaurio de Google: Edición Gráfica HD")
+st.write("Disfruta del clásico juego del dinosaurio con sprites e imágenes reales en alta definición. Presiona la **Barra Espaciadora** o **Flecha Arriba** para saltar.")
 
-# Código HTML, CSS y JS del juego del T-Rex
+# Código HTML, CSS y JS con imágenes reales de T-Rex y obstáculos
 game_code = """
 <!DOCTYPE html>
 <html lang="es">
@@ -19,8 +19,8 @@ game_code = """
     <meta charset="utf-8">
     <style>
         body {
-            background-color: #121212;
-            color: #ffffff;
+            background-color: #0f172a;
+            color: #f8fafc;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
@@ -30,31 +30,32 @@ game_code = """
             padding: 10px;
         }
         .container {
-            background: #1e1e1e;
-            border: 2px solid #555;
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid #38bdf8;
             padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            border-radius: 14px;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
             text-align: center;
         }
         #score-panel {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #aaa;
+            color: #38bdf8;
             letter-spacing: 1px;
         }
         canvas {
-            background-color: #f7f7f7;
-            border-radius: 6px;
+            background-color: #ffffff;
+            border-radius: 8px;
             display: block;
             margin: 0 auto;
             outline: none;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
         .instructions {
             margin-top: 10px;
             font-size: 13px;
-            color: #888;
+            color: #94a3b8;
         }
     </style>
 </head>
@@ -62,7 +63,7 @@ game_code = """
 
     <div class="container">
         <div id="score-panel">HI: 00000 &nbsp;&nbsp;&nbsp; 00000</div>
-        <canvas id="gameCanvas" width="600" height="200" tabindex="1"></canvas>
+        <canvas id="gameCanvas" width="600" height="220" tabindex="1"></canvas>
         <div class="instructions">Usa la <strong>Barra Espaciadora</strong> o <strong>Flecha Arriba</strong> para saltar.</div>
     </div>
 
@@ -78,19 +79,25 @@ game_code = """
         let isGameOver = false;
         let gameStarted = false;
 
+        // Cargar imágenes reales en alta definición para el T-Rex y los obstáculos
+        const dinoImg = new Image();
+        dinoImg.src = "https://cdn.jsdelivr.net/gh/wayou/t-rex-runner/img/trex.png";
+
+        const cactusImg = new Image();
+        cactusImg.src = "https://cdn.jsdelivr.net/gh/wayou/t-rex-runner/img/obstacle-1.png";
+
         // Dinosaurio
         let dino = {
             x: 50,
-            y: 130,
-            width: 30,
-            height: 40,
+            y: 135,
+            width: 44,
+            height: 47,
             vy: 0,
             gravity: 0.6,
-            jumpPower: -10,
+            jumpPower: -10.5,
             isJumping: false
         };
 
-        // Obstáculos (Cactus)
         let obstacles = [];
         let obstacleTimer = 0;
 
@@ -106,7 +113,6 @@ game_code = """
             }
         });
 
-        // Click en canvas para saltar en móviles/tablets
         canvas.addEventListener("click", () => {
             if (!gameStarted || isGameOver) {
                 resetGame();
@@ -121,7 +127,7 @@ game_code = """
             gameSpeed = 5;
             obstacles = [];
             obstacleTimer = 0;
-            dino.y = 130;
+            dino.y = 135;
             dino.vy = 0;
             dino.isJumping = false;
             isGameOver = false;
@@ -132,99 +138,93 @@ game_code = """
         function update() {
             if (isGameOver || !gameStarted) return;
 
-            // Movimiento del Dinosaurio (Gravedad)
             dino.vy += dino.gravity;
             dino.y += dino.vy;
 
-            // Suelo
-            if (dino.y > 130) {
-                dino.y = 130;
+            if (dino.y > 135) {
+                dino.y = 135;
                 dino.vy = 0;
                 dino.isJumping = false;
             }
 
-            // Generar obstáculos
             obstacleTimer++;
-            if (obstacleTimer > Math.random() * 50 + 70) {
-                let obsWidth = 15 + Math.random() * 15;
-                let obsHeight = 25 + Math.random() * 20;
+            if (obstacleTimer > Math.random() * 55 + 75) {
                 obstacles.push({
                     x: canvas.width,
-                    y: 170 - obsHeight,
-                    width: obsWidth,
-                    height: obsHeight
+                    y: 138,
+                    width: 30,
+                    height: 44
                 });
                 obstacleTimer = 0;
             }
 
-            // Mover obstáculos y detectar colisiones
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 obstacles[i].x -= gameSpeed;
 
-                // Colisión AABB
+                // Colisión ajustada con margen real de las imágenes
                 if (
-                    dino.x < obstacles[i].x + obstacles[i].width &&
-                    dino.x + dino.width > obstacles[i].x &&
-                    dino.y < obstacles[i].y + obstacles[i].height &&
+                    dino.x + 8 < obstacles[i].x + obstacles[i].width - 6 &&
+                    dino.x + dino.width - 8 > obstacles[i].x + 6 &&
+                    dino.y + 5 < obstacles[i].y + obstacles[i].height &&
                     dino.y + dino.height > obstacles[i].y
                 ) {
                     isGameOver = true;
                     if (score > highscore) highscore = Math.floor(score);
                 }
 
-                // Eliminar fuera de pantalla
                 if (obstacles[i].x + obstacles[i].width < 0) {
                     obstacles.splice(i, 1);
                     score += 10;
                 }
             }
 
-            // Incrementar dificultad progresiva
             gameSpeed = 5 + Math.floor(score / 100);
         }
 
         function draw() {
-            // Limpiar lienzo
-            ctx.fillStyle = "#f7f7f7";
+            ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Suelo
+            // Suelo detallado
             ctx.strokeStyle = "#535353";
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(0, 170);
-            ctx.lineTo(canvas.width, 170);
+            ctx.moveTo(0, 182);
+            ctx.lineTo(canvas.width, 182);
             ctx.stroke();
 
-            // Dibujar Dinosaurio (Clásico T-Rex pixelado minimalista)
-            ctx.fillStyle = "#535353";
-            ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
-            // Ojo del dino
-            ctx.fillStyle = "#f7f7f7";
-            ctx.fillRect(dino.x + 20, dino.y + 6, 4, 4);
+            // Dibujar Dinosaurio con imagen real HD
+            if (dinoImg.complete) {
+                ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+            } else {
+                ctx.fillStyle = "#535353";
+                ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+            }
 
-            // Dibujar Cactus
-            ctx.fillStyle = "#2e7d32";
+            // Dibujar Obstáculos (Cactus reales HD)
             obstacles.forEach(obs => {
-                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                if (cactusImg.complete) {
+                    ctx.drawImage(cactusImg, obs.x, obs.y, obs.width, obs.height);
+                } else {
+                    ctx.fillStyle = "#2e7d32";
+                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                }
             });
 
-            // Pantalla de inicio o fin
             if (!gameStarted) {
                 ctx.fillStyle = "#535353";
                 ctx.font = "16px sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText("Presiona Espacio o Clic para Jugar", canvas.width / 2, canvas.height / 2);
+                ctx.fillText("Presiona Espacio o Clic para Iniciar", canvas.width / 2, canvas.height / 2);
             } else if (isGameOver) {
                 ctx.fillStyle = "#535353";
-                ctx.font = "20px sans-serif";
+                ctx.font = "20px bold sans-serif";
                 ctx.textAlign = "center";
                 ctx.fillText("G A M E   O V E R", canvas.width / 2, canvas.height / 2 - 10);
-                ctx.font = "12px sans-serif";
+                ctx.font = "13px sans-serif";
                 ctx.fillText("Presiona Espacio para Reiniciar", canvas.width / 2, canvas.height / 2 + 15);
             }
 
-            // Actualizar Marcador
             let scStr = Math.floor(score).toString().padStart(5, '0');
             let hiStr = highscore.toString().padStart(5, '0');
             document.getElementById("score-panel").innerText = `HI: ${hiStr}    ${scStr}`;
@@ -238,12 +238,21 @@ game_code = """
             }
         }
 
-        // Renderizado inicial estático
-        draw();
+        // Cargar imágenes antes de dibujar el estado estático inicial
+        let loadedCount = 0;
+        function checkLoaded() {
+            loadedCount++;
+            if (loadedCount === 2) draw();
+        }
+        dinoImg.onload = checkLoaded;
+        cactusImg.onload = checkLoaded;
+        
+        // Fallback por si cargan instantáneamente
+        setTimeout(draw, 100);
     </script>
 </body>
 </html>
 """
 
 # Renderizar en Streamlit
-components.html(game_code, height=300)
+components.html(game_code, height=320)
