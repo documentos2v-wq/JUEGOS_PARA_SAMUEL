@@ -3,15 +3,15 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Space Combat 2026 - Streamlit",
+    page_title="Galaxy Combat 2026 - Streamlit",
     page_icon="🚀",
     layout="centered"
 )
 
-st.title("🚀 Space Combat 2026: Galaxy Odyssey")
-st.write("Selecciona tu nave de alta visibilidad, destruye asteroides con la **Barra Espaciadora** y recoge las recompensas flotantes para mejorar tu poder de fuego y recuperar vidas.")
+st.title("🚀 Galaxy Combat 2026: Deep Space Odyssey")
+st.write("Disfruta de gráficos de alta definición con naves detalladas, un fondo de galaxia realista en movimiento, sistema de disparos láser y recompensas flotantes.")
 
-# Código HTML, CSS y JS con naves mejoradas y sistema de recompensas
+# Código HTML, CSS y JS con Galaxia de fondo y Naves HD detalladas
 game_code = """
 <!DOCTYPE html>
 <html>
@@ -19,7 +19,7 @@ game_code = """
     <meta charset="utf-8">
     <style>
         body {
-            background-color: #030309;
+            background-color: #020205;
             color: #00ffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -38,7 +38,7 @@ game_code = """
             padding: 15px;
             border-radius: 12px;
             border: 2px solid #00ffff;
-            box-shadow: 0 0 20px rgba(0,255,255,0.3);
+            box-shadow: 0 0 20px rgba(0,255,255,0.4);
         }
         .ship-options {
             display: flex;
@@ -58,11 +58,11 @@ game_code = """
         .ship-card:hover, .ship-card.selected {
             border-color: #00ffff;
             background: #1f2937;
-            box-shadow: 0 0 15px rgba(0,255,255,0.5);
+            box-shadow: 0 0 15px rgba(0,255,255,0.6);
             transform: translateY(-2px);
         }
         .ship-preview {
-            font-size: 30px;
+            font-size: 32px;
             margin-bottom: 5px;
         }
         #ui-container {
@@ -80,7 +80,7 @@ game_code = """
         }
         #start-btn {
             background: linear-gradient(45deg, #00ffff, #0077ff);
-            color: #030309;
+            color: #020205;
             border: none;
             padding: 9px 22px;
             font-weight: bold;
@@ -96,8 +96,8 @@ game_code = """
         }
         canvas {
             border: 2px solid #00ffff;
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
+            background: #020510;
+            box-shadow: 0 0 35px rgba(0, 255, 255, 0.3);
             border-radius: 8px;
             outline: none;
         }
@@ -105,13 +105,13 @@ game_code = """
 </head>
 <body>
 
-    <!-- MENÚ DE SELECCIÓN DE NAVE VISIBLE Y ATRACTIVA -->
+    <!-- MENÚ DE SELECCIÓN DE NAVE HD -->
     <div id="menu-container">
-        <h3 style="margin-top:0; color:#38bdf8;">SELECCIONA TU NAVE DE COMBATE</h3>
+        <h3 style="margin-top:0; color:#38bdf8;">SELECCIONA TU NAVE DE COMBATE HD</h3>
         <div class="ship-options">
             <div class="ship-card selected" onclick="selectShip(0)" id="ship0">
                 <div class="ship-preview">🛸</div>
-                <div style="font-size:13px; font-weight:bold; color:#fff;">Vanguard</div>
+                <div style="font-size:13px; font-weight:bold; color:#fff;">Vanguard HD</div>
                 <div style="font-size:11px; color:#38bdf8;">Equilibrada</div>
             </div>
             <div class="ship-card" onclick="selectShip(1)" id="ship1">
@@ -122,10 +122,10 @@ game_code = """
             <div class="ship-card" onclick="selectShip(2)" id="ship2">
                 <div class="ship-preview">🛰️</div>
                 <div style="font-size:13px; font-weight:bold; color:#fff;">Titanium</div>
-                <div style="font-size:11px; color:#fb923c;">Alta Resistencia</div>
+                <div style="font-size:11px; color:#fb923c;">Alta Blindaje</div>
             </div>
         </div>
-        <button id="start-btn" onclick="initGame()">¡INICIAR COMBATE ESPACIAL!</button>
+        <button id="start-btn" onclick="initGame()">¡DESPEGAR A LA GALAXIA!</button>
     </div>
 
     <div id="ui-container" style="display:none;">
@@ -144,24 +144,24 @@ game_code = """
         let score = 0;
         let level = 1;
         let lives = 3;
-        let powerLevel = 1; // 1: Normal, 2: Doble Láser, 3: Triple Láser Supremo
+        let powerLevel = 1; 
         let isPlaying = false;
         let gameInterval;
         let selectedShipType = 0;
 
         let ship = {
             x: 195,
-            y: 450,
-            width: 46,
-            height: 48,
-            speed: 6,
-            color: "#00ffff"
+            y: 440,
+            width: 50,
+            height: 52,
+            speed: 6.5
         };
 
         let asteroids = [];
         let bullets = [];
         let rewards = [];
         let particles = [];
+        let galaxyOffset = 0;
         let obstacleTimer = 0;
         let keys = {};
         let shootCooldown = 0;
@@ -173,9 +173,9 @@ game_code = """
                 else card.classList.remove('selected');
             });
 
-            if(type === 0) { ship.speed = 6.5; ship.color = "#00ffff"; }
-            else if(type === 1) { ship.speed = 8.5; ship.color = "#a855f7"; }
-            else if(type === 2) { ship.speed = 4.8; ship.color = "#f97316"; }
+            if(type === 0) ship.speed = 6.5;
+            else if(type === 1) ship.speed = 8.5;
+            else if(type === 2) ship.speed = 4.8;
         }
 
         window.addEventListener("keydown", (e) => { 
@@ -200,7 +200,7 @@ game_code = """
             rewards = [];
             particles = [];
             ship.x = 195;
-            ship.y = 450;
+            ship.y = 440;
             obstacleTimer = 0;
             isPlaying = true;
             canvas.focus();
@@ -225,27 +225,20 @@ game_code = """
         }
 
         function createReward(x, y) {
-            // 35% de probabilidad de soltar recompensa al romper un asteroide
             if (Math.random() < 0.35) {
                 let types = ['life', 'power', 'score'];
                 let chosenType = types[Math.floor(Math.random() * types.length)];
-                rewards.push({
-                    x: x,
-                    y: y,
-                    type: chosenType,
-                    radius: 12,
-                    speed: 2.2
-                });
+                rewards.push({ x: x, y: y, type: chosenType, radius: 12, speed: 2.2 });
             }
         }
 
         function createExplosion(x, y, color) {
-            for(let i = 0; i < 22; i++) {
+            for(let i = 0; i < 24; i++) {
                 particles.push({
                     x: x, y: y,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.5) * 6,
-                    life: 25,
+                    vx: (Math.random() - 0.5) * 7,
+                    vy: (Math.random() - 0.5) * 7,
+                    life: 28,
                     color: color
                 });
             }
@@ -254,61 +247,49 @@ game_code = """
         function updateAndDraw() {
             if (!isPlaying) return;
 
-            // Movimiento libre en 4 direcciones
+            // Movimiento en 4 ejes
             if ((keys["ArrowLeft"] || keys["KeyA"]) && ship.x > 10) ship.x -= ship.speed;
             if ((keys["ArrowRight"] || keys["KeyD"]) && ship.x + ship.width < canvas.width - 10) ship.x += ship.speed;
             if ((keys["ArrowUp"] || keys["KeyW"]) && ship.y > 10) ship.y -= ship.speed;
             if ((keys["ArrowDown"] || keys["KeyS"]) && ship.y + ship.height < canvas.height - 10) ship.y += ship.speed;
 
-            // Sistema de disparo avanzado con la barra espaciadora
+            // Disparos láser con barra espaciadora
             if (shootCooldown > 0) shootCooldown--;
             if (keys["Space"] && shootCooldown === 0) {
                 if (powerLevel === 1) {
-                    bullets.push({ x: ship.x + ship.width / 2 - 2, y: ship.y, width: 4, height: 14, speed: 11 });
+                    bullets.push({ x: ship.x + ship.width / 2 - 2, y: ship.y, width: 4, height: 14, speed: 12 });
                 } else if (powerLevel === 2) {
-                    bullets.push({ x: ship.x + 8, y: ship.y, width: 4, height: 14, speed: 11 });
-                    bullets.push({ x: ship.x + ship.width - 12, y: ship.y, width: 4, height: 14, speed: 11 });
+                    bullets.push({ x: ship.x + 8, y: ship.y, width: 4, height: 14, speed: 12 });
+                    bullets.push({ x: ship.x + ship.width - 12, y: ship.y, width: 4, height: 14, speed: 12 });
                 } else {
-                    bullets.push({ x: ship.x + ship.width / 2 - 2, y: ship.y, width: 4, height: 14, speed: 11 });
-                    bullets.push({ x: ship.x + 4, y: ship.y + 10, width: 4, height: 14, speed: 11 });
-                    bullets.push({ x: ship.x + ship.width - 8, y: ship.y + 10, width: 4, height: 14, speed: 11 });
+                    bullets.push({ x: ship.x + ship.width / 2 - 2, y: ship.y, width: 4, height: 14, speed: 12 });
+                    bullets.push({ x: ship.x + 4, y: ship.y + 10, width: 4, height: 14, speed: 12 });
+                    bullets.push({ x: ship.x + ship.width - 8, y: ship.y + 10, width: 4, height: 14, speed: 12 });
                 }
-                shootCooldown = 10;
+                shootCooldown = 9;
             }
 
-            // Mover balas
             for (let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
                 b.y -= b.speed;
                 if (b.y < 0) bullets.splice(i, 1);
             }
 
-            // Mover y recoger recompensas
             for (let i = rewards.length - 1; i >= 0; i--) {
                 let r = rewards[i];
                 r.y += r.speed;
-
-                // Colisión nave con recompensa
                 let shipCenterX = ship.x + ship.width / 2;
                 let shipCenterY = ship.y + ship.height / 2;
-                let distToReward = Math.hypot(shipCenterX - r.x, shipCenterY - r.y);
-
-                if (distToReward < r.radius + 20) {
-                    if (r.type === 'life') {
-                        if (lives < 5) lives++;
-                    } else if (r.type === 'power') {
-                        if (powerLevel < 3) powerLevel++;
-                    } else if (r.type === 'score') {
-                        score += 75;
-                    }
+                if (Math.hypot(shipCenterX - r.x, shipCenterY - r.y) < r.radius + 20) {
+                    if (r.type === 'life' && lives < 5) lives++;
+                    else if (r.type === 'power' && powerLevel < 3) powerLevel++;
+                    else if (r.type === 'score') score += 75;
                     rewards.splice(i, 1);
                     continue;
                 }
-
                 if (r.y > canvas.height + 20) rewards.splice(i, 1);
             }
 
-            // Generador de asteroides
             obstacleTimer++;
             let spawnRate = Math.max(25, 48 - (level * 4));
             if (obstacleTimer > spawnRate) {
@@ -316,17 +297,14 @@ game_code = """
                 obstacleTimer = 0;
             }
 
-            // Actualizar asteroides y colisiones
             for (let i = asteroids.length - 1; i >= 0; i--) {
                 let ast = asteroids[i];
                 ast.y += ast.speed;
                 ast.rotation += ast.rotSpeed;
 
-                // Colisión bala con asteroide
                 for (let j = bullets.length - 1; j >= 0; j--) {
                     let b = bullets[j];
-                    let dist = Math.hypot(b.x - ast.x, b.y - ast.y);
-                    if (dist < ast.radius) {
+                    if (Math.hypot(b.x - ast.x, b.y - ast.y) < ast.radius) {
                         bullets.splice(j, 1);
                         ast.hp--;
                         if (ast.hp <= 0) {
@@ -342,16 +320,13 @@ game_code = """
 
                 if (!asteroids[i]) continue;
 
-                // Colisión nave con asteroide
                 let shipCenterX = ship.x + ship.width / 2;
                 let shipCenterY = ship.y + ship.height / 2;
-                let collisionDist = Math.hypot(shipCenterX - ast.x, shipCenterY - ast.y);
-
-                if (collisionDist < ast.radius + 16) {
+                if (Math.hypot(shipCenterX - ast.x, shipCenterY - ast.y) < ast.radius + 16) {
                     createExplosion(shipCenterX, shipCenterY, "#ef4444");
                     asteroids.splice(i, 1);
                     lives--;
-                    powerLevel = 1; // Pierde potencia al chocar
+                    powerLevel = 1;
                     if (lives <= 0) {
                         isPlaying = false;
                         setTimeout(() => {
@@ -369,103 +344,142 @@ game_code = """
                 }
             }
 
-            // --- RENDERIZADO VISIBLE Y ESTÉTICO ---
+            // --- RENDERIZADO VISUAL CON GALAXIA DE FONDO Y NAVE HD ---
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Fondo estelar dinámico
-            ctx.fillStyle = "rgba(255,255,255,0.2)";
-            ctx.fillRect(80, (Date.now()/10)%canvas.height, 2, 2);
-            ctx.fillRect(240, (Date.now()/7)%canvas.height, 3, 3);
-            ctx.fillRect(370, (Date.now()/12)%canvas.height, 2, 2);
+            // 1. Dibujar Fondo de Galaxia en Movimiento
+            galaxyOffset += 0.2;
+            let gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2 + (galaxyOffset % 50), 20, canvas.width / 2, canvas.height / 2, 350);
+            gradient.addColorStop(0, "rgba(76, 29, 149, 0.35)"); // Núcleo morado galáctico
+            gradient.addColorStop(0.5, "rgba(14, 116, 144, 0.2)"); // Anillo cian
+            gradient.addColorStop(1, "#020205"); // Oscuridad espacial exterior
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Dibujar Balas Láser brillantes
+            // Estrellas de fondo estelares
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.fillRect(60, (Date.now()/9)%canvas.height, 2, 2);
+            ctx.fillRect(220, (Date.now()/6)%canvas.height, 3, 3);
+            ctx.fillRect(380, (Date.now()/11)%canvas.height, 2, 2);
+
+            // 2. Dibujar Balas Láser
             ctx.fillStyle = powerLevel === 3 ? "#00ffcc" : "#38bdf8";
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 12;
             ctx.shadowColor = ctx.fillStyle;
             bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
             ctx.shadowBlur = 0;
 
-            // Dibujar Recompensas Flotantes
+            // 3. Dibujar Recompensas
             rewards.forEach(r => {
                 ctx.save();
                 ctx.translate(r.x, r.y);
                 ctx.shadowBlur = 12;
-                if (r.type === 'life') {
-                    ctx.fillStyle = "#ef4444";
-                    ctx.shadowColor = "#ef4444";
-                    ctx.font = "20px sans-serif";
-                    ctx.fillText("❤️", -10, 8);
-                } else if (r.type === 'power') {
-                    ctx.fillStyle = "#eab308";
-                    ctx.shadowColor = "#eab308";
-                    ctx.font = "20px sans-serif";
-                    ctx.fillText("⚡", -10, 8);
-                } else {
-                    ctx.fillStyle = "#38bdf8";
-                    ctx.shadowColor = "#38bdf8";
-                    ctx.font = "20px sans-serif";
-                    ctx.fillText("💎", -10, 8);
-                }
+                ctx.font = "20px sans-serif";
+                if (r.type === 'life') { ctx.shadowColor = "#ef4444"; ctx.fillText("❤️", -10, 8); }
+                else if (r.type === 'power') { ctx.shadowColor = "#eab308"; ctx.fillText("⚡", -10, 8); }
+                else { ctx.shadowColor = "#38bdf8"; ctx.fillText("💎", -10, 8); }
                 ctx.restore();
             });
 
-            // --- DIBUJAR NAVE CON ALTA VISIBILIDAD Y DETALLE ---
+            // 4. --- NAVE HD ULTRA DETALLADA (Segun tu selección) ---
             ctx.save();
             let sx = ship.x;
             let sy = ship.y;
 
-            // Propulsores con brillo de plasma
-            ctx.fillStyle = "#38bdf8";
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = "#38bdf8";
-            ctx.fillRect(sx + 12, sy + 44, 6, 8);
-            ctx.fillRect(sx + 28, sy + 44, 6, 8);
+            // Estela de propulsión plasma brillante
+            ctx.fillStyle = selectedShipType === 1 ? "#c084fc" : "#00ffff";
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.fillRect(sx + 14, sy + 48, 6, 10);
+            ctx.fillRect(sx + 30, sy + 48, 6, 10);
 
-            // Alas aerodinámicas con luces de neón
-            ctx.fillStyle = ship.color;
-            ctx.beginPath();
-            ctx.moveTo(sx + 23, sy + 5);
-            ctx.lineTo(sx - 4, sy + 38);
-            ctx.lineTo(sx + 12, sy + 42);
-            ctx.lineTo(sx + 23, sy + 28);
-            ctx.fill();
+            if (selectedShipType === 0) {
+                // VANGUARD HD (Caza aerodinámico estilizado)
+                ctx.fillStyle = "#38bdf8"; // Alas principales
+                ctx.beginPath();
+                ctx.moveTo(sx + 25, sy + 4);
+                ctx.lineTo(sx - 2, sy + 36);
+                ctx.lineTo(sx + 14, sy + 44);
+                ctx.lineTo(sx + 25, sy + 30);
+                ctx.fill();
 
-            ctx.beginPath();
-            ctx.moveTo(sx + 23, sy + 5);
-            ctx.lineTo(sx + 50, sy + 38);
-            ctx.lineTo(sx + 34, sy + 42);
-            ctx.lineTo(sx + 23, sy + 28);
-            ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(sx + 25, sy + 4);
+                ctx.lineTo(sx + 52, sy + 36);
+                ctx.lineTo(sx + 36, sy + 44);
+                ctx.lineTo(sx + 25, sy + 30);
+                ctx.fill();
 
-            // Fuselaje principal metálico brillante
-            ctx.fillStyle = "#f1f5f9";
-            ctx.beginPath();
-            ctx.moveTo(sx + 23, sy); // Nariz frontal
-            ctx.lineTo(sx + 35, sy + 18);
-            ctx.lineTo(sx + 35, sy + 44);
-            ctx.lineTo(sx + 23, sy + 50); // Cola
-            ctx.lineTo(sx + 11, sy + 44);
-            ctx.lineTo(sx + 11, sy + 18);
-            ctx.closePath();
-            ctx.fill();
+                // Fuselaje blindado plateado
+                ctx.fillStyle = "#e2e8f0";
+                ctx.beginPath();
+                ctx.moveTo(sx + 25, sy);
+                ctx.lineTo(sx + 36, sy + 15);
+                ctx.lineTo(sx + 36, sy + 46);
+                ctx.lineTo(sx + 25, sy + 52);
+                ctx.lineTo(sx + 14, sy + 46);
+                ctx.lineTo(sx + 14, sy + 15);
+                ctx.closePath();
+                ctx.fill();
 
-            // Cabina de cristal de alta visibilidad
-            ctx.fillStyle = "#0284c7";
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = "#0284c7";
-            ctx.beginPath();
-            ctx.ellipse(sx + 23, sy + 20, 5, 10, 0, 0, Math.PI * 2);
-            ctx.fill();
+                // Cabina de cristal azul neón
+                ctx.fillStyle = "#0284c7";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#38bdf8";
+                ctx.beginPath();
+                ctx.ellipse(sx + 25, sy + 20, 5, 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+            } else if (selectedShipType === 1) {
+                // INTERCEPTOR (Nave veloz futurista violeta)
+                ctx.fillStyle = "#c084fc";
+                ctx.beginPath();
+                ctx.moveTo(sx + 25, sy - 2);
+                ctx.lineTo(sx + 2, sy + 42);
+                ctx.lineTo(sx + 25, sy + 32);
+                ctx.lineTo(sx + 48, sy + 42);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = "#f3e8ff";
+                ctx.beginPath();
+                ctx.moveTo(sx + 25, sy + 4);
+                ctx.lineTo(sx + 14, sy + 38);
+                ctx.lineTo(sx + 25, sy + 46);
+                ctx.lineTo(sx + 36, sy + 38);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = "#38bdf8";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#c084fc";
+                ctx.beginPath();
+                ctx.ellipse(sx + 25, sy + 22, 4, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+            } else {
+                // TITANIUM (Nave de asalto robusta dorada/naranja)
+                ctx.fillStyle = "#ea580c";
+                ctx.fillRect(sx + 6, sy + 10, 38, 36);
+
+                ctx.fillStyle = "#fb923c";
+                ctx.fillRect(sx, sy + 20, 50, 16);
+
+                ctx.fillStyle = "#fef08a";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#f97316";
+                ctx.fillRect(sx + 18, sy + 15, 14, 22);
+            }
 
             ctx.restore();
 
-            // Dibujar Asteroides espaciales rotativos
+            // 5. Dibujar Asteroides
             asteroids.forEach(ast => {
                 ctx.save();
                 ctx.translate(ast.x, ast.y);
                 ctx.rotate(ast.rotation);
-                ctx.fillStyle = "#b45309";
-                ctx.strokeStyle = "#78350f";
+                ctx.fillStyle = "#9a3412";
+                ctx.strokeStyle = "#431407";
                 ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.arc(0, 0, ast.radius, 0, Math.PI * 2);
@@ -483,7 +497,7 @@ game_code = """
                 if (p.life <= 0) particles.splice(i, 1);
             }
 
-            // Actualizar HUD
+            // HUD
             document.getElementById("score").innerText = "Puntuación: " + score;
             document.getElementById("level").innerText = "Nivel: " + level;
             let hearts = "";
