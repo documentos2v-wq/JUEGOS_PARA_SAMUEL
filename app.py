@@ -8,10 +8,10 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🚀 Space Combat 2026: Escuadrón Estelar")
-st.write("Selecciona tu nave, despega con el botón de inicio, muévete con total libertad y presiona la **Barra Espaciadora** para disparar y destruir los asteroides.")
+st.title("🚀 Space Combat 2026: Galaxy Odyssey")
+st.write("Selecciona tu nave de alta visibilidad, destruye asteroides con la **Barra Espaciadora** y recoge las recompensas flotantes para mejorar tu poder de fuego y recuperar vidas.")
 
-# Código HTML, CSS y JS con selección de naves, disparos y asteroides
+# Código HTML, CSS y JS con naves mejoradas y sistema de recompensas
 game_code = """
 <!DOCTYPE html>
 <html>
@@ -19,7 +19,7 @@ game_code = """
     <meta charset="utf-8">
     <style>
         body {
-            background-color: #050510;
+            background-color: #030309;
             color: #00ffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -34,33 +34,35 @@ game_code = """
             flex-direction: column;
             align-items: center;
             margin-bottom: 10px;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(10, 15, 30, 0.95);
             padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #00ffff;
+            border-radius: 12px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
         }
         .ship-options {
             display: flex;
             gap: 15px;
-            margin: 10px 0;
+            margin: 12px 0;
         }
         .ship-card {
-            background: #1e293b;
-            border: 2px solid #334155;
-            padding: 10px;
+            background: #111827;
+            border: 2px solid #374151;
+            padding: 12px;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
             transition: 0.2s;
-            width: 110px;
+            width: 115px;
         }
         .ship-card:hover, .ship-card.selected {
             border-color: #00ffff;
-            background: #0f172a;
-            box-shadow: 0 0 10px rgba(0,255,255,0.4);
+            background: #1f2937;
+            box-shadow: 0 0 15px rgba(0,255,255,0.5);
+            transform: translateY(-2px);
         }
-        .ship-card img, .ship-preview {
-            font-size: 28px;
+        .ship-preview {
+            font-size: 30px;
             margin-bottom: 5px;
         }
         #ui-container {
@@ -70,29 +72,32 @@ game_code = """
             margin-bottom: 8px;
             align-items: center;
         }
-        #score, #level, #lives {
-            font-size: 15px;
+        #score, #level, #lives, #power {
+            font-size: 14px;
             font-weight: bold;
             color: #00ffcc;
+            text-shadow: 0 0 5px rgba(0,255,204,0.4);
         }
         #start-btn {
             background: linear-gradient(45deg, #00ffff, #0077ff);
-            color: #050510;
+            color: #030309;
             border: none;
-            padding: 8px 20px;
+            padding: 9px 22px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
             border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 0 12px rgba(0,255,255,0.6);
+            box-shadow: 0 0 15px rgba(0,255,255,0.7);
+            transition: 0.2s;
         }
         #start-btn:hover {
             transform: scale(1.05);
+            background: linear-gradient(45deg, #ffffff, #00ffff);
         }
         canvas {
             border: 2px solid #00ffff;
             background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
-            box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
             border-radius: 8px;
             outline: none;
         }
@@ -100,32 +105,33 @@ game_code = """
 </head>
 <body>
 
-    <!-- MENÚ DE SELECCIÓN DE NAVE -->
+    <!-- MENÚ DE SELECCIÓN DE NAVE VISIBLE Y ATRACTIVA -->
     <div id="menu-container">
-        <h3>SELECCIONA TU NAVE</h3>
+        <h3 style="margin-top:0; color:#38bdf8;">SELECCIONA TU NAVE DE COMBATE</h3>
         <div class="ship-options">
             <div class="ship-card selected" onclick="selectShip(0)" id="ship0">
                 <div class="ship-preview">🛸</div>
-                <div style="font-size:13px; font-weight:bold;">Vanguard</div>
-                <div style="font-size:11px; color:#94a3b8;">Equilibrada</div>
+                <div style="font-size:13px; font-weight:bold; color:#fff;">Vanguard</div>
+                <div style="font-size:11px; color:#38bdf8;">Equilibrada</div>
             </div>
             <div class="ship-card" onclick="selectShip(1)" id="ship1">
                 <div class="ship-preview">🚀</div>
-                <div style="font-size:13px; font-weight:bold;">Interceptor</div>
-                <div style="font-size:11px; color:#94a3b8;">Rápida</div>
+                <div style="font-size:13px; font-weight:bold; color:#fff;">Interceptor</div>
+                <div style="font-size:11px; color:#c084fc;">Ultra Rápida</div>
             </div>
             <div class="ship-card" onclick="selectShip(2)" id="ship2">
                 <div class="ship-preview">🛰️</div>
-                <div style="font-size:13px; font-weight:bold;">Titan</div>
-                <div style="font-size:11px; color:#94a3b8;">Resistente</div>
+                <div style="font-size:13px; font-weight:bold; color:#fff;">Titanium</div>
+                <div style="font-size:11px; color:#fb923c;">Alta Resistencia</div>
             </div>
         </div>
-        <button id="start-btn" onclick="initGame()">¡DESPEGAR MISION!</button>
+        <button id="start-btn" onclick="initGame()">¡INICIAR COMBATE ESPACIAL!</button>
     </div>
 
-    <div id="ui-container" style="display:none;" id="hud">
+    <div id="ui-container" style="display:none;">
         <div id="score">Puntuación: 0</div>
         <div id="lives">Vidas: ❤️❤️❤️</div>
+        <div id="power">Láser: Normal</div>
         <div id="level">Nivel: 1</div>
     </div>
     
@@ -138,22 +144,23 @@ game_code = """
         let score = 0;
         let level = 1;
         let lives = 3;
+        let powerLevel = 1; // 1: Normal, 2: Doble Láser, 3: Triple Láser Supremo
         let isPlaying = false;
         let gameInterval;
-        let selectedShipType = 0; // 0: Vanguard, 1: Interceptor, 2: Titan
+        let selectedShipType = 0;
 
-        // Configuración de la nave del jugador
         let ship = {
             x: 195,
             y: 450,
-            width: 45,
-            height: 45,
+            width: 46,
+            height: 48,
             speed: 6,
             color: "#00ffff"
         };
 
         let asteroids = [];
         let bullets = [];
+        let rewards = [];
         let particles = [];
         let obstacleTimer = 0;
         let keys = {};
@@ -166,9 +173,9 @@ game_code = """
                 else card.classList.remove('selected');
             });
 
-            if(type === 0) { ship.speed = 6; ship.color = "#00ffff"; }
-            else if(type === 1) { ship.speed = 8; ship.color = "#a855f7"; }
-            else if(type === 2) { ship.speed = 4.5; ship.color = "#f97316"; }
+            if(type === 0) { ship.speed = 6.5; ship.color = "#00ffff"; }
+            else if(type === 1) { ship.speed = 8.5; ship.color = "#a855f7"; }
+            else if(type === 2) { ship.speed = 4.8; ship.color = "#f97316"; }
         }
 
         window.addEventListener("keydown", (e) => { 
@@ -187,8 +194,10 @@ game_code = """
             score = 0;
             level = 1;
             lives = 3;
+            powerLevel = 1;
             asteroids = [];
             bullets = [];
+            rewards = [];
             particles = [];
             ship.x = 195;
             ship.y = 450;
@@ -201,7 +210,7 @@ game_code = """
         }
 
         function spawnAsteroid() {
-            let radius = 18 + Math.random() * 16;
+            let radius = 18 + Math.random() * 18;
             let x = Math.random() * (canvas.width - radius * 2) + radius;
             let speed = 2.5 + level * 0.5 + Math.random() * 1.5;
             asteroids.push({
@@ -210,19 +219,33 @@ game_code = """
                 radius: radius,
                 speed: speed,
                 rotation: Math.random() * Math.PI,
-                rotSpeed: (Math.random() - 0.5) * 0.05,
-                hp: Math.ceil(radius / 15) // Los más grandes requieren más disparos
+                rotSpeed: (Math.random() - 0.5) * 0.04,
+                hp: Math.ceil(radius / 14)
             });
         }
 
-        function createExplosion(x, y, color) {
-            for(let i = 0; i < 25; i++) {
-                particles.push({
+        function createReward(x, y) {
+            // 35% de probabilidad de soltar recompensa al romper un asteroide
+            if (Math.random() < 0.35) {
+                let types = ['life', 'power', 'score'];
+                let chosenType = types[Math.floor(Math.random() * types.length)];
+                rewards.push({
                     x: x,
                     y: y,
-                    vx: (Math.random() - 0.5) * 7,
-                    vy: (Math.random() - 0.5) * 7,
-                    life: 30,
+                    type: chosenType,
+                    radius: 12,
+                    speed: 2.2
+                });
+            }
+        }
+
+        function createExplosion(x, y, color) {
+            for(let i = 0; i < 22; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 25,
                     color: color
                 });
             }
@@ -231,41 +254,75 @@ game_code = """
         function updateAndDraw() {
             if (!isPlaying) return;
 
-            // --- CONTROLES DE MOVIMIENTO LIBRE (4 EJES) ---
+            // Movimiento libre en 4 direcciones
             if ((keys["ArrowLeft"] || keys["KeyA"]) && ship.x > 10) ship.x -= ship.speed;
             if ((keys["ArrowRight"] || keys["KeyD"]) && ship.x + ship.width < canvas.width - 10) ship.x += ship.speed;
             if ((keys["ArrowUp"] || keys["KeyW"]) && ship.y > 10) ship.y -= ship.speed;
             if ((keys["ArrowDown"] || keys["KeyS"]) && ship.y + ship.height < canvas.height - 10) ship.y += ship.speed;
 
-            // --- SISTEMA DE DISPARO (Barra Espaciadora) ---
+            // Sistema de disparo avanzado con la barra espaciadora
             if (shootCooldown > 0) shootCooldown--;
             if (keys["Space"] && shootCooldown === 0) {
-                bullets.push({ x: ship.x + ship.width / 2 - 2, y: ship.y, width: 4, height: 12, speed: 10 });
-                shootCooldown = 12; // Cadencia de disparo
+                if (powerLevel === 1) {
+                    bullets.push({ x: ship.x + ship.width / 2 - 2, y: ship.y, width: 4, height: 14, speed: 11 });
+                } else if (powerLevel === 2) {
+                    bullets.push({ x: ship.x + 8, y: ship.y, width: 4, height: 14, speed: 11 });
+                    bullets.push({ x: ship.x + ship.width - 12, y: ship.y, width: 4, height: 14, speed: 11 });
+                } else {
+                    bullets.push({ x: ship.x + ship.width / 2 - 2, y: ship.y, width: 4, height: 14, speed: 11 });
+                    bullets.push({ x: ship.x + 4, y: ship.y + 10, width: 4, height: 14, speed: 11 });
+                    bullets.push({ x: ship.x + ship.width - 8, y: ship.y + 10, width: 4, height: 14, speed: 11 });
+                }
+                shootCooldown = 10;
             }
 
-            // Mover Balas
+            // Mover balas
             for (let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
                 b.y -= b.speed;
                 if (b.y < 0) bullets.splice(i, 1);
             }
 
-            // Generador de Asteroide
+            // Mover y recoger recompensas
+            for (let i = rewards.length - 1; i >= 0; i--) {
+                let r = rewards[i];
+                r.y += r.speed;
+
+                // Colisión nave con recompensa
+                let shipCenterX = ship.x + ship.width / 2;
+                let shipCenterY = ship.y + ship.height / 2;
+                let distToReward = Math.hypot(shipCenterX - r.x, shipCenterY - r.y);
+
+                if (distToReward < r.radius + 20) {
+                    if (r.type === 'life') {
+                        if (lives < 5) lives++;
+                    } else if (r.type === 'power') {
+                        if (powerLevel < 3) powerLevel++;
+                    } else if (r.type === 'score') {
+                        score += 75;
+                    }
+                    rewards.splice(i, 1);
+                    continue;
+                }
+
+                if (r.y > canvas.height + 20) rewards.splice(i, 1);
+            }
+
+            // Generador de asteroides
             obstacleTimer++;
-            let spawnRate = Math.max(25, 50 - (level * 4));
+            let spawnRate = Math.max(25, 48 - (level * 4));
             if (obstacleTimer > spawnRate) {
                 spawnAsteroid();
                 obstacleTimer = 0;
             }
 
-            // Actualizar Asteroide y Colisiones
+            // Actualizar asteroides y colisiones
             for (let i = asteroids.length - 1; i >= 0; i--) {
                 let ast = asteroids[i];
                 ast.y += ast.speed;
                 ast.rotation += ast.rotSpeed;
 
-                // Colisión Bala <-> Asteroide
+                // Colisión bala con asteroide
                 for (let j = bullets.length - 1; j >= 0; j--) {
                     let b = bullets[j];
                     let dist = Math.hypot(b.x - ast.x, b.y - ast.y);
@@ -274,8 +331,9 @@ game_code = """
                         ast.hp--;
                         if (ast.hp <= 0) {
                             createExplosion(ast.x, ast.y, "#fdba74");
-                            score += 25;
-                            level = Math.floor(score / 120) + 1;
+                            createReward(ast.x, ast.y);
+                            score += 30;
+                            level = Math.floor(score / 150) + 1;
                             asteroids.splice(i, 1);
                             break;
                         }
@@ -284,19 +342,20 @@ game_code = """
 
                 if (!asteroids[i]) continue;
 
-                // Colisión Nave <-> Asteroide
+                // Colisión nave con asteroide
                 let shipCenterX = ship.x + ship.width / 2;
                 let shipCenterY = ship.y + ship.height / 2;
                 let collisionDist = Math.hypot(shipCenterX - ast.x, shipCenterY - ast.y);
 
-                if (collisionDist < ast.radius + 15) {
+                if (collisionDist < ast.radius + 16) {
                     createExplosion(shipCenterX, shipCenterY, "#ef4444");
                     asteroids.splice(i, 1);
                     lives--;
+                    powerLevel = 1; // Pierde potencia al chocar
                     if (lives <= 0) {
                         isPlaying = false;
                         setTimeout(() => {
-                            alert("💥 ¡Nave destruida! Fin de la misión. Puntuación: " + score);
+                            alert("💥 ¡Nave destruida! Fin de la misión. Puntuación final: " + score);
                             document.getElementById("menu-container").style.display = "flex";
                             document.getElementById("ui-container").style.display = "none";
                             canvas.style.display = "none";
@@ -304,63 +363,103 @@ game_code = """
                     }
                 }
 
-                // Asteroide fuera de pantalla
                 if (ast.y > canvas.height + 50) {
                     asteroids.splice(i, 1);
-                    score += 5;
+                    score += 10;
                 }
             }
 
-            // --- RENDERIZADO GRÁFICO ---
+            // --- RENDERIZADO VISIBLE Y ESTÉTICO ---
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Estrellas de fondo
-            ctx.fillStyle = "rgba(255,255,255,0.15)";
-            ctx.fillRect(50, (Date.now()/12)%canvas.height, 2, 2);
-            ctx.fillRect(200, (Date.now()/8)%canvas.height, 3, 3);
-            ctx.fillRect(350, (Date.now()/15)%canvas.height, 2, 2);
+            // Fondo estelar dinámico
+            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            ctx.fillRect(80, (Date.now()/10)%canvas.height, 2, 2);
+            ctx.fillRect(240, (Date.now()/7)%canvas.height, 3, 3);
+            ctx.fillRect(370, (Date.now()/12)%canvas.height, 2, 2);
 
-            // Dibujar Balas Láser
-            ctx.fillStyle = "#38bdf8";
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = "#38bdf8";
+            // Dibujar Balas Láser brillantes
+            ctx.fillStyle = powerLevel === 3 ? "#00ffcc" : "#38bdf8";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = ctx.fillStyle;
             bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
             ctx.shadowBlur = 0;
 
-            // Dibujar Naves según selección
+            // Dibujar Recompensas Flotantes
+            rewards.forEach(r => {
+                ctx.save();
+                ctx.translate(r.x, r.y);
+                ctx.shadowBlur = 12;
+                if (r.type === 'life') {
+                    ctx.fillStyle = "#ef4444";
+                    ctx.shadowColor = "#ef4444";
+                    ctx.font = "20px sans-serif";
+                    ctx.fillText("❤️", -10, 8);
+                } else if (r.type === 'power') {
+                    ctx.fillStyle = "#eab308";
+                    ctx.shadowColor = "#eab308";
+                    ctx.font = "20px sans-serif";
+                    ctx.fillText("⚡", -10, 8);
+                } else {
+                    ctx.fillStyle = "#38bdf8";
+                    ctx.shadowColor = "#38bdf8";
+                    ctx.font = "20px sans-serif";
+                    ctx.fillText("💎", -10, 8);
+                }
+                ctx.restore();
+            });
+
+            // --- DIBUJAR NAVE CON ALTA VISIBILIDAD Y DETALLE ---
             ctx.save();
             let sx = ship.x;
             let sy = ship.y;
-            ctx.fillStyle = ship.color;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = ship.color;
 
-            if (selectedShipType === 0) { // Vanguard (Caza estelar clásico)
-                ctx.beginPath();
-                ctx.moveTo(sx + 22, sy);
-                ctx.lineTo(sx + 45, sy + 35);
-                ctx.lineTo(sx + 30, sy + 28);
-                ctx.lineTo(sx + 22, sy + 40);
-                ctx.lineTo(sx + 15, sy + 28);
-                ctx.lineTo(sx, sy + 35);
-                ctx.closePath();
-                ctx.fill();
-            } else if (selectedShipType === 1) { // Interceptor (Estilo veloz agudo)
-                ctx.beginPath();
-                ctx.moveTo(sx + 22, sy - 5);
-                ctx.lineTo(sx + 42, sy + 40);
-                ctx.lineTo(sx + 22, sy + 30);
-                ctx.lineTo(sx, sy + 40);
-                ctx.closePath();
-                ctx.fill();
-            } else { // Titan (Nave pesada y robusta)
-                ctx.fillRect(sx + 8, sy + 5, 28, 35);
-                ctx.fillStyle = "#cbd5e1";
-                ctx.fillRect(sx, sy + 15, 44, 12);
-            }
+            // Propulsores con brillo de plasma
+            ctx.fillStyle = "#38bdf8";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#38bdf8";
+            ctx.fillRect(sx + 12, sy + 44, 6, 8);
+            ctx.fillRect(sx + 28, sy + 44, 6, 8);
+
+            // Alas aerodinámicas con luces de neón
+            ctx.fillStyle = ship.color;
+            ctx.beginPath();
+            ctx.moveTo(sx + 23, sy + 5);
+            ctx.lineTo(sx - 4, sy + 38);
+            ctx.lineTo(sx + 12, sy + 42);
+            ctx.lineTo(sx + 23, sy + 28);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(sx + 23, sy + 5);
+            ctx.lineTo(sx + 50, sy + 38);
+            ctx.lineTo(sx + 34, sy + 42);
+            ctx.lineTo(sx + 23, sy + 28);
+            ctx.fill();
+
+            // Fuselaje principal metálico brillante
+            ctx.fillStyle = "#f1f5f9";
+            ctx.beginPath();
+            ctx.moveTo(sx + 23, sy); // Nariz frontal
+            ctx.lineTo(sx + 35, sy + 18);
+            ctx.lineTo(sx + 35, sy + 44);
+            ctx.lineTo(sx + 23, sy + 50); // Cola
+            ctx.lineTo(sx + 11, sy + 44);
+            ctx.lineTo(sx + 11, sy + 18);
+            ctx.closePath();
+            ctx.fill();
+
+            // Cabina de cristal de alta visibilidad
+            ctx.fillStyle = "#0284c7";
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = "#0284c7";
+            ctx.beginPath();
+            ctx.ellipse(sx + 23, sy + 20, 5, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.restore();
 
-            // Dibujar Asteroides en rotación
+            // Dibujar Asteroides espaciales rotativos
             asteroids.forEach(ast => {
                 ctx.save();
                 ctx.translate(ast.x, ast.y);
@@ -390,6 +489,11 @@ game_code = """
             let hearts = "";
             for(let h=0; h<lives; h++) hearts += "❤️";
             document.getElementById("lives").innerText = "Vidas: " + hearts;
+            
+            let powerText = "Normal";
+            if(powerLevel === 2) powerText = "Doble ⚡";
+            if(powerLevel === 3) powerText = "Supremo ⚡⚡";
+            document.getElementById("power").innerText = "Láser: " + powerText;
         }
     </script>
 </body>
