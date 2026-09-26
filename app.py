@@ -3,15 +3,15 @@ import streamlit.components.v1 as components
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Cyber Arena 2026 - Streamlit",
-    page_icon="⚡",
+    page_title="Cyber Fighter 2026 - Streamlit",
+    page_icon="🥋",
     layout="centered"
 )
 
-st.title("⚡ Cyber Arena 2026: Next-Gen Fighting")
-st.write("Combate 1v1 de alta tecnología. **P1 (CIBER-RED):** W/A/D para mover/saltar, **F** para golpear. **P2 (CIBER-BLUE):** Flechas para mover/saltar, **L** para golpear.")
+st.title("🥋 Cyber Fighter 2026: Ultra Combat")
+st.write("Controles avanzados. **P1:** Moverse (A/D), Saltar (W), Agacharse (S), Golpear (F), Defender/Bloquear (E). **P2:** Moverse (Flechas), Saltar (Arriba), Agacharse (Abajo), Golpear (L), Defender/Bloquear (Shift Derecho).")
 
-# Código HTML, CSS y JS con gráficos futuristas y efectos visuales 2026
+# Código HTML, CSS y JS con luchadores detallados, agacharse y defensa
 game_code = """
 <!DOCTYPE html>
 <html>
@@ -32,7 +32,7 @@ game_code = """
         #hud-container {
             display: flex;
             justify-content: space-between;
-            width: 560px;
+            width: 580px;
             margin-bottom: 10px;
             font-weight: bold;
             font-size: 14px;
@@ -40,7 +40,7 @@ game_code = """
         .player-hud {
             display: flex;
             flex-direction: column;
-            width: 250px;
+            width: 260px;
         }
         .health-bar {
             width: 100%;
@@ -68,7 +68,7 @@ game_code = """
             background: linear-gradient(45deg, #00ffff, #3b82f6);
             color: #030309;
             border: none;
-            padding: 10px 26px;
+            padding: 10px 28px;
             font-weight: bold;
             font-size: 15px;
             border-radius: 25px;
@@ -92,20 +92,20 @@ game_code = """
 </head>
 <body>
 
-    <button id="start-btn" onclick="initGame()">⚡ INICIAR COMBATE CIBERNETICO</button>
+    <button id="start-btn" onclick="initGame()">🥋 INICIAR COMBATE PROFESIONAL</button>
 
     <div id="hud-container">
         <div class="player-hud" style="color: #f97316;">
-            <span>PLAYER 1 [ CIBER-RED ]</span>
+            <span>PLAYER 1 [ CIBER-RED ] (Defensa: E)</span>
             <div class="health-bar"><div id="hp1" class="health-fill-p1"></div></div>
         </div>
         <div class="player-hud" style="color: #06b6d4; text-align: right;">
-            <span>PLAYER 2 [ CIBER-BLUE ]</span>
+            <span>PLAYER 2 [ CIBER-BLUE ] (Defensa: Shift)</span>
             <div class="health-bar"><div id="hp2" class="health-fill-p2"></div></div>
         </div>
     </div>
     
-    <canvas id="gameCanvas" width="560" height="380" tabindex="1"></canvas>
+    <canvas id="gameCanvas" width="580" height="380" tabindex="1"></canvas>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -115,40 +115,43 @@ game_code = """
         let gameInterval;
         let keys = {};
         let particles = [];
-        let hitEffects = [];
 
         // Jugador 1
         let p1 = {
-            x: 90,
-            y: 250,
-            width: 45,
-            height: 75,
+            x: 100,
+            y: 240,
+            width: 36,
+            height: 80,
             color: "#f97316",
-            speed: 5.5,
+            speed: 5,
             hp: 100,
-            isJumping: false,
             vy: 0,
+            isJumping: false,
+            isCrouching: false,
+            isBlocking: false,
             isPunching: false,
             direction: 1
         };
 
         // Jugador 2
         let p2 = {
-            x: 420,
-            y: 250,
-            width: 45,
-            height: 75,
+            x: 440,
+            y: 240,
+            width: 36,
+            height: 80,
             color: "#06b6d4",
-            speed: 5.5,
+            speed: 5,
             hp: 100,
-            isJumping: false,
             vy: 0,
+            isJumping: false,
+            isCrouching: false,
+            isBlocking: false,
             isPunching: false,
             direction: -1
         };
 
         window.addEventListener("keydown", (e) => {
-            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","KeyW","KeyS","KeyA","KeyD","KeyF","KeyL","Space"].includes(e.code)) {
+            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","KeyW","KeyS","KeyA","KeyD","KeyF","KeyL","KeyE","ShiftRight","Space"].includes(e.code)) {
                 e.preventDefault();
             }
             keys[e.code] = true;
@@ -162,10 +165,9 @@ game_code = """
         });
 
         function initGame() {
-            p1.x = 90; p1.y = 250; p1.hp = 100; p1.vy = 0; p1.isJumping = false;
-            p2.x = 420; p2.y = 250; p2.hp = 100; p2.vy = 0; p2.isJumping = false;
+            p1.x = 100; p1.y = 240; p1.hp = 100; p1.vy = 0; p1.isJumping = false; p1.isCrouching = false;
+            p2.x = 440; p2.y = 240; p2.hp = 100; p2.vy = 0; p2.isJumping = false; p2.isCrouching = false;
             particles = [];
-            hitEffects = [];
             isPlaying = true;
             document.getElementById("start-btn").style.display = "none";
             canvas.focus();
@@ -179,42 +181,40 @@ game_code = """
             setTimeout(() => { attacker.isPunching = false; }, 140);
 
             let dist = Math.abs((attacker.x + attacker.width/2) - (defender.x + defender.width/2));
-            let sameHeight = Math.abs(attacker.y - defender.y) < 50;
+            let sameHeight = Math.abs(attacker.y - defender.y) < 55;
 
-            if (dist < 75 && sameHeight) {
-                defender.hp -= 12;
-                if (defender.hp < 0) defender.hp = 0;
-                updateHUD();
+            if (dist < 70 && sameHeight) {
+                if (defender.isBlocking) {
+                    // Si está defendiendo, no recibe daño y salen chispas de bloqueo
+                    for(let i=0; i<8; i++) {
+                        particles.push({
+                            x: defender.x + defender.width/2, y: defender.y + 35,
+                            vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6,
+                            life: 15, color: "#38bdf8"
+                        });
+                    }
+                } else {
+                    defender.hp -= 10;
+                    if (defender.hp < 0) defender.hp = 0;
+                    updateHUD();
 
-                // Crear ondas de impacto cibernéticas
-                hitEffects.push({
-                    x: (attacker.x + defender.x) / 2 + 20,
-                    y: attacker.y + 30,
-                    radius: 10,
-                    alpha: 1,
-                    color: color
-                });
+                    for(let i=0; i<12; i++) {
+                        particles.push({
+                            x: defender.x + defender.width/2, y: defender.y + 35,
+                            vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+                            life: 20, color: color
+                        });
+                    }
 
-                // Partículas de chispa
-                for(let i=0; i<15; i++) {
-                    particles.push({
-                        x: defender.x + defender.width/2,
-                        y: defender.y + 30,
-                        vx: (Math.random() - 0.5) * 8,
-                        vy: (Math.random() - 0.5) * 8,
-                        life: 20,
-                        color: color
-                    });
-                }
-
-                if (defender.hp === 0) {
-                    isPlaying = false;
-                    let winner = attacker === p1 ? "🏆 ¡PLAYER 1 (CIBER-RED) VICTORIA!" : "🏆 ¡PLAYER 2 (CIBER-BLUE) VICTORIA!";
-                    setTimeout(() => {
-                        alert(winner);
-                        document.getElementById("start-btn").style.display = "block";
-                        document.getElementById("start-btn").innerText = "🔄 NUEVA REVANCHA";
-                    }, 150);
+                    if (defender.hp === 0) {
+                        isPlaying = false;
+                        let winner = attacker === p1 ? "🏆 ¡PLAYER 1 GANA EL COMBATE!" : "🏆 ¡PLAYER 2 GANA EL COMBATE!";
+                        setTimeout(() => {
+                            alert(winner);
+                            document.getElementById("start-btn").style.display = "block";
+                            document.getElementById("start-btn").innerText = "🔄 REVANCHA";
+                        }, 150);
+                    }
                 }
             }
         }
@@ -227,105 +227,112 @@ game_code = """
         function updateAndDraw() {
             if (!isPlaying) return;
 
-            // Movimiento P1
+            // --- CONTROLES P1 ---
+            p1.isCrouching = keys["KeyS"] && !p1.isJumping;
+            p1.isBlocking = keys["KeyE"] && !p1.isCrouching;
+            
             if (keys["KeyA"] && p1.x > 15) { p1.x -= p1.speed; p1.direction = -1; }
-            if (keys["KeyD"] && p1.x < p2.x - 25) { p1.x += p1.speed; p1.direction = 1; }
-            if (keys["KeyW"] && !p1.isJumping) {
+            if (keys["KeyD"] && p1.x < p2.x - 30) { p1.x += p1.speed; p1.direction = 1; }
+            if (keys["KeyW"] && !p1.isJumping && !p1.isCrouching) {
                 p1.vy = -13;
                 p1.isJumping = true;
             }
 
-            // Movimiento P2
-            if (keys["ArrowLeft"] && p2.x > p1.x + 25) { p2.x -= p2.speed; p2.direction = -1; }
-            if (keys["ArrowRight"] && p2.x < canvas.width - 60) { p2.x += p2.speed; p2.direction = 1; }
-            if (keys["ArrowUp"] && !p2.isJumping) {
+            // --- CONTROLES P2 ---
+            p2.isCrouching = keys["ArrowDown"] && !p2.isJumping;
+            p2.isBlocking = keys["ShiftRight"] && !p2.isCrouching;
+
+            if (keys["ArrowLeft"] && p2.x > p1.x + 30) { p2.x -= p2.speed; p2.direction = -1; }
+            if (keys["ArrowRight"] && p2.x < canvas.width - 50) { p2.x += p2.speed; p2.direction = 1; }
+            if (keys["ArrowUp"] && !p2.isJumping && !p2.isCrouching) {
                 p2.vy = -13;
                 p2.isJumping = true;
             }
 
-            // Gravedad
+            // Gravedad P1
             p1.vy += 0.65; p1.y += p1.vy;
-            if (p1.y > 250) { p1.y = 250; p1.vy = 0; p1.isJumping = false; }
+            let floorY = p1.isCrouching ? 270 : 240;
+            if (p1.y > floorY) { p1.y = floorY; p1.vy = 0; p1.isJumping = false; }
 
+            // Gravedad P2
             p2.vy += 0.65; p2.y += p2.vy;
-            if (p2.y > 250) { p2.y = 250; p2.vy = 0; p2.isJumping = false; }
+            let floorY2 = p2.isCrouching ? 270 : 240;
+            if (p2.y > floorY2) { p2.y = floorY2; p2.vy = 0; p2.isJumping = false; }
 
-            // --- RENDERIZADO GRÁFICO AVANZADO 2026 ---
+            // --- RENDERIZADO GRÁFICO REALISTA ---
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Rejilla cibernética de fondo
+            // Fondo y Suelo
             ctx.strokeStyle = "rgba(0, 255, 255, 0.05)";
-            ctx.lineWidth = 1;
-            for(let i = 0; i < canvas.width; i += 40) {
+            for(let i = 0; i < canvas.width; i += 45) {
                 ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
             }
 
-            // Suelo de neón
             ctx.fillStyle = "#0f172a";
-            ctx.fillRect(0, 325, canvas.width, 55);
+            ctx.fillRect(0, 320, canvas.width, 60);
             ctx.strokeStyle = "#00ffff";
             ctx.lineWidth = 3;
             ctx.shadowBlur = 15;
             ctx.shadowColor = "#00ffff";
-            ctx.beginPath(); ctx.moveTo(0, 325); ctx.lineTo(canvas.width, 325); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, 320); ctx.lineTo(canvas.width, 320); ctx.stroke();
             ctx.shadowBlur = 0;
 
-            // --- DIBUJAR LUCHADOR 1 (CIBER-RED HD) ---
-            ctx.save();
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = p1.color;
-            ctx.fillStyle = p1.color;
-            // Cuerpo acorazado
-            ctx.fillRect(p1.x, p1.y + 15, p1.width, p1.height - 15);
-            // Casco cibernético
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(p1.x + 5, p1.y, p1.width - 10, 18);
-            ctx.fillStyle = "#ef4444";
-            ctx.fillRect(p1.x + 10, p1.y + 5, p1.width - 20, 6); // Visor
-            // Puño en ataque
-            if (p1.isPunching) {
-                ctx.fillStyle = "#ffedd5";
-                let px = p1.direction === 1 ? p1.x + p1.width : p1.x - 22;
-                ctx.fillRect(px, p1.y + 25, 22, 14);
-            }
-            ctx.restore();
+            // --- FUNCIÓN PARA DIBUJAR LUCHADOR CON CABEZA, TORSO, BRAZOS Y PIERNAS ---
+            function drawFighter(p) {
+                ctx.save();
+                ctx.shadowBlur = p.isBlocking ? 20 : 10;
+                ctx.shadowColor = p.isBlocking ? "#38bdf8" : p.color;
 
-            // --- DIBUJAR LUCHADOR 2 (CIBER-BLUE HD) ---
-            ctx.save();
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = p2.color;
-            ctx.fillStyle = p2.color;
-            // Cuerpo acorazado
-            ctx.fillRect(p2.x, p2.y + 15, p2.width, p2.height - 15);
-            // Casco cibernético
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(p2.x + 5, p2.y, p2.width - 10, 18);
-            ctx.fillStyle = "#3b82f6";
-            ctx.fillRect(p2.x + 10, p2.y + 5, p2.width - 20, 6); // Visor
-            // Puño en ataque
-            if (p2.isPunching) {
-                ctx.fillStyle = "#e0f2fe";
-                let px2 = p2.direction === 1 ? p2.x + p2.width : p2.x - 22;
-                ctx.fillRect(px2, p2.y + 25, 22, 14);
-            }
-            ctx.restore();
+                let h = p.isCrouching ? 50 : p.height;
+                let yOffset = p.isCrouching ? 30 : 0;
 
-            // Efectos de ondas de golpe
-            for (let i = hitEffects.length - 1; i >= 0; i--) {
-                let he = hitEffects[i];
-                he.radius += 3;
-                he.alpha -= 0.05;
-                ctx.strokeStyle = he.color;
-                ctx.lineWidth = 3;
-                ctx.globalAlpha = he.alpha;
-                ctx.beginPath();
-                ctx.arc(he.x, he.y, he.radius, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.globalAlpha = 1.0;
-                if (he.alpha <= 0) hitEffects.splice(i, 1);
+                // 1. Cabeza
+                ctx.fillStyle = "#e2e8f0";
+                ctx.fillRect(p.x + 6, p.y + yOffset, 24, 20);
+                // Visor / Ojos
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x + (p.direction === 1 ? 18 : 6), p.y + yOffset + 6, 10, 5);
+
+                // 2. Torso (Armadura)
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x + 4, p.y + yOffset + 20, 28, 30);
+
+                // 3. Escudo de Defensa (si está bloqueando)
+                if (p.isBlocking) {
+                    ctx.strokeStyle = "#38bdf8";
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    let shieldX = p.direction === 1 ? p.x - 5 : p.x + p.width - 15;
+                    ctx.arc(shieldX + 10, p.y + yOffset + 35, 28, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // 4. Brazos / Puños
+                ctx.fillStyle = "#cbd5e1";
+                if (p.isPunching) {
+                    let punchX = p.direction === 1 ? p.x + p.width : p.x - 22;
+                    ctx.fillRect(punchX, p.y + yOffset + 26, 22, 10);
+                } else {
+                    ctx.fillRect(p.x + (p.direction === 1 ? 28 : -10), p.y + yOffset + 24, 18, 10);
+                }
+
+                // 5. Piernas separadas
+                ctx.fillStyle = "#1e293b";
+                if (p.isCrouching) {
+                    ctx.fillRect(p.x + 6, p.y + yOffset + 50, 10, 10);
+                    ctx.fillRect(p.x + 20, p.y + yOffset + 50, 10, 10);
+                } else {
+                    ctx.fillRect(p.x + 6, p.y + yOffset + 50, 10, 30);
+                    ctx.fillRect(p.x + 20, p.y + yOffset + 50, 10, 30);
+                }
+
+                ctx.restore();
             }
 
-            // Partículas de combate
+            drawFighter(p1);
+            drawFighter(p2);
+
+            // Partículas de impacto
             for (let i = particles.length - 1; i >= 0; i--) {
                 let pt = particles[i];
                 pt.x += pt.vx; pt.y += pt.vy; pt.life--;
