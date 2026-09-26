@@ -2,8 +2,8 @@ import streamlit as st
 
 # Configuración de la página para ocupar todo el ancho
 st.set_page_config(
-    page_title="Reto Mental Infinito",
-    page_icon="🧠",
+    page_title="Reto Mental Infinito con Pingüino",
+    page_icon="🐧",
     layout="wide"
 )
 
@@ -30,7 +30,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Código HTML y JS con bucle infinito y banco expansible de preguntas capciosas
+# Código HTML y JS con el pingüino bailando y modo infinito
 game_html = """
 <!DOCTYPE html>
 <html lang="es">
@@ -52,7 +52,7 @@ game_html = """
             justify-content: space-between;
             width: 100vw;
             height: 100vh;
-            padding: 30px 40px;
+            padding: 20px 40px;
             overflow: hidden;
         }
         .stats {
@@ -62,7 +62,7 @@ game_html = """
             font-weight: bold;
             color: #38bdf8;
             border-bottom: 2px solid #1e293b;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
             width: 100%;
         }
         .question-container {
@@ -75,16 +75,27 @@ game_html = """
             max-width: 900px;
             margin: 0 auto;
         }
+        /* Estilos del pingüino bailando */
+        .penguin-container {
+            font-size: 60px;
+            text-align: center;
+            margin-bottom: 10px;
+            animation: dance 0.6s infinite alternate ease-in-out;
+        }
+        @keyframes dance {
+            0% { transform: translateY(0) rotate(-10deg) scale(1); }
+            100% { transform: translateY(-15px) rotate(10deg) scale(1.1); }
+        }
         .question-box {
             background: #0f172a;
-            padding: 30px;
+            padding: 25px;
             border-radius: 14px;
-            font-size: 26px;
+            font-size: 24px;
             color: #ffffff;
             border-left: 6px solid #f59e0b;
-            line-height: 1.5;
+            line-height: 1.4;
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             width: 100%;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
@@ -98,7 +109,7 @@ game_html = """
             background: #1e293b;
             color: white;
             border: 2px solid #334155;
-            padding: 20px;
+            padding: 18px;
             font-size: 18px;
             font-weight: bold;
             border-radius: 12px;
@@ -120,9 +131,9 @@ game_html = """
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            min-height: 60px;
+            min-height: 50px;
             border-top: 2px solid #1e293b;
-            padding-top: 15px;
+            padding-top: 10px;
         }
         #feedback {
             font-size: 22px;
@@ -132,7 +143,7 @@ game_html = """
             background: linear-gradient(45deg, #22c55e, #16a34a);
             color: white;
             border: none;
-            padding: 14px 35px;
+            padding: 12px 30px;
             font-size: 18px;
             font-weight: bold;
             border-radius: 30px;
@@ -149,10 +160,13 @@ game_html = """
 
     <div class="stats">
         <div id="score">Aciertos: 0</div>
-        <div id="roundInfo">Modo Infinito</div>
+        <div id="roundInfo">Modo Infinito 🐧</div>
     </div>
 
     <div class="question-container">
+        <!-- Pingüino bailando para distraer -->
+        <div class="penguin-container" id="dancingPenguin">🐧</div>
+        
         <div class="question-box" id="questionText">Cargando desafío mental...</div>
         <div class="options-container" id="optionsContainer"></div>
     </div>
@@ -186,6 +200,8 @@ game_html = """
         let score = 0;
         let answered = false;
 
+        const penguins = ["🐧", "🕺🐧", "🪩🐧", "🧊🐧", "✨🐧"];
+
         function initGame() {
             score = 0;
             refillPool();
@@ -193,12 +209,10 @@ game_html = """
         }
 
         function refillPool() {
-            // Recarga el banco de preguntas asegurando que ninguna se repita en el ciclo actual
             availableQuestions = [...masterQuestions];
         }
 
         function loadNextQuestion() {
-            // Si el banco temporal se vacía, se recarga automáticamente sin fin (Sin pantallas finales)
             if (availableQuestions.length === 0) {
                 refillPool();
             }
@@ -206,6 +220,10 @@ game_html = """
             answered = false;
             document.getElementById("feedback").innerText = "";
             document.getElementById("next-btn").style.display = "none";
+
+            // Cambiar aleatoriamente el estilo del pingüino bailarín para más variedad
+            let randomPenguin = penguins[Math.floor(Math.random() * penguins.length)];
+            document.getElementById("dancingPenguin").innerText = randomPenguin;
 
             let randomIndex = Math.floor(Math.random() * availableQuestions.length);
             currentQuestion = availableQuestions.splice(randomIndex, 1)[0];
@@ -261,4 +279,4 @@ game_html = """
 </html>
 """
 
-st.components.v1.html(game_html, height=800, scrolling=False)
+st.components.v1.html(game_html, height=850, scrolling=False)
