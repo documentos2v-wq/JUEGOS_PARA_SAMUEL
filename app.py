@@ -9,9 +9,9 @@ st.set_page_config(
 )
 
 st.title("🐍 Culebrita Retro en Streamlit")
-st.write("Usa las **flechas del teclado** dentro del recuadro para mover la serpiente.")
+st.write("Haz clic dentro del cuadro del juego y usa las **flechas del teclado** para mover la serpiente.")
 
-# Código HTML y JavaScript del juego encapsulado
+# Código HTML y JavaScript corregido
 game_code = """
 <!DOCTYPE html>
 <html>
@@ -37,23 +37,31 @@ game_code = """
         canvas {
             border: 3px solid #4CAF50;
             background-color: #111;
+            outline: none;
         }
     </style>
 </head>
 <body>
     <div id="score">Puntuación: 0</div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <canvas id="gameCanvas" width="400" height="400" tabindex="1"></canvas>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
+        // Forzar foco en el canvas para que capte las teclas de inmediato
+        canvas.focus();
+
         const tileSize = 20;
         const tileCount = canvas.width / tileSize;
 
-        let snake = [{ x: 10, y: 10 }];
+        let snake = [
+            { x: 10, y: 10 },
+            { x: 9, y: 10 },
+            { x: 8, y: 10 }
+        ];
         let food = { x: 5, y: 5 };
-        let dx = 0;
+        let dx = 1; // Empieza moviéndose a la derecha de forma segura
         let dy = 0;
         let score = 0;
         let gameInterval;
@@ -64,7 +72,8 @@ game_code = """
 
         function startGame() {
             resetGame();
-            gameInterval = setInterval(main, 100);
+            if(gameInterval) clearInterval(gameInterval);
+            gameInterval = setInterval(main, 120);
         }
 
         function main() {
@@ -140,7 +149,11 @@ game_code = """
         }
 
         function resetGame() {
-            snake = [{ x: 10, y: 10 }];
+            snake = [
+                { x: 10, y: 10 },
+                { x: 9, y: 10 },
+                { x: 8, y: 10 }
+            ];
             dx = 1;
             dy = 0;
             score = 0;
