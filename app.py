@@ -56,9 +56,9 @@ else:
                         "Responde siempre en español, con un tono amable, educativo y estructurado mediante viñetas."
                     )
                     
-                    # Llamada al modelo oficial de Gemini
+                    # Llamada utilizando el modelo oficial exigido gemini-3.8-flash
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash',
+                        model='gemini-3.8-flash',
                         contents=user_prompt,
                         config={
                             'system_instruction': system_instruction,
