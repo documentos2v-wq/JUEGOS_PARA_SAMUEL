@@ -2,22 +2,22 @@ import streamlit as st
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Enciclopedia y Chat del Cuerpo Humano",
+    page_title="Asistente Amigable del Cuerpo Humano",
     page_icon="🧬",
     layout="centered"
 )
 
 # Título y descripción principal
-st.title("🧬 Asistente Experto del Cuerpo Humano")
-st.write("Pregúntame sobre cualquier órgano, sistema (nervioso, circulatorio, digestivo, etc.), huesos, músculos o cómo funciona nuestro organismo.")
+st.title("🧬 Tu Guía Amigable del Cuerpo Humano")
+st.write("¡Hola! Pregúntame lo que quieras sobre anatomía, órganos, sistemas o cómo funciona nuestro organismo. ¡Estoy aquí para explicártelo de forma sencilla!")
 
 # Aviso médico de responsabilidad
-st.info("⚠️ **Aviso informativo:** Este chat tiene fines educativos y de divulgación científica sobre anatomía y biología humana. No sustituye la consulta médica profesional.")
+st.info("⚠️ **Aviso informativo:** Este chat tiene fines educativos y de divulgación científica. No sustituye la consulta médica profesional.")
 
 # Inicializar el historial del chat
 if "body_chat_messages" not in st.session_state:
     st.session_state.body_chat_messages = [
-        {"role": "assistant", "content": "¡Hola! Soy tu guía especializado en el cuerpo humano. ¿Qué te gustaría saber hoy? Puedes preguntarme sobre el corazón, el cerebro, los músculos, cómo digerimos los alimentos y mucho más."}
+        {"role": "assistant", "content": "¡Hola! Qué gusto saludarte 😊. ¿Qué te gustaría descubrir hoy sobre el cuerpo humano? Puedes preguntarme sobre el corazón, el cerebro, los huesos o cualquier curiosidad."}
     ]
 
 # Mostrar los mensajes anteriores en la interfaz de chat
@@ -32,25 +32,50 @@ if user_question := st.chat_input("Escribe tu pregunta sobre el cuerpo humano...
     with st.chat_message("user"):
         st.markdown(user_question)
 
-    # Procesar la respuesta automática basada en temas del cuerpo humano
+    # Procesar la respuesta inteligente y amigable
     q_lower = user_question.lower()
     
-    if any(w in q_lower for w in ["corazón", "latidos", "sangre", "circulación", "arterias", "venas"]):
-        answer = "❤️ **El Sistema Circulatorio y el Corazón:**\nEl corazón es un músculo increíble que actúa como una bomba doble. Late unas 100,000 veces al día, impulsando sangre oxigenada por las arterias hacia todo el cuerpo y recibiendo sangre de regreso a través de las venas para purificarla en los pulmones."
+    # 1. Saludos y cortesía
+    if any(w in q_lower for w in ["hola", "saludos", "buenas", "qué tal", "hey"]):
+        answer = "¡Hola de nuevo! 👋 Qué bueno tener esta charla contigo. Dime, ¿qué parte del cuerpo humano te da curiosidad hoy?"
+    elif any(w in q_lower for w in ["gracias", "excelente", "genial", "buen trabajo", "te agradezco"]):
+        answer = "¡De nada! Me alegra mucho poder ayudarte a conocer más sobre nuestra increíble biología. ¿Tienes alguna otra duda? ✨"
+    
+    # 2. Corazón y sistema circulatorio
+    elif any(w in q_lower for w in ["corazón", "latidos", "sangre", "circulación", "arterias", "venas"]):
+        answer = "❤️ **¡Hablemos del corazón!**\nEs un órgano fascinante: es un músculo que actúa como una bomba perfecta. Late unas 100,000 veces al día y mueve la sangre por miles de kilómetros de vasos sanguíneos en tu cuerpo para llevar oxígeno a cada rincón. ¿Te gustaría saber cómo se oxigena la sangre?"
+    
+    # 3. Cerebro y sistema nervioso
     elif any(w in q_lower for w in ["cerebro", "mente", "neuronas", "pensar", "memoria", "encéfalo"]):
-        answer = "🧠 **El Cerebro y el Sistema Nervioso:**\nEl cerebro es el centro de control del cuerpo. Contiene aproximadamente 86 mil millones de neuronas que se comunican mediante impulsos eléctricos y químicos. Controla tus pensamientos, memoria, emociones, movimientos y la respiración inconsciente."
-    elif any(w in q_lower for w in ["estómago", "digestión", "intestino", "comer", "comida", "hígado"]):
-        answer = "🍏 **El Sistema Digestivo:**\nLa digestión comienza en la boca y recorre un tubo de unos 9 metros de longitud. El estómago utiliza ácidos potentes para descomponer los alimentos, mientras que el intestino delgado absorbe los nutrientes y el intestino grueso se encarga del agua."
-    elif any(w in q_lower for w in ["pulmones", "respirar", "aire", "oxígeno", "respiratorio"]):
-        answer = "🫁 **Los Pulmones y la Respiración:**\nInhalamos aire para capturar oxígeno, el cual pasa a los glóbulos rojos en los alvéolos pulmonares. Al mismo tiempo, expulsamos dióxido de carbone, que es un desecho metabólico de nuestras células."
-    elif any(w in q_lower for w in ["huesos", "esqueleto", "fémur", "columna", "articulaciones"]):
-        answer = "🦴 **El Sistema Óseo:**\nUn adulto humano tiene 206 huesos. El hueso más largo y fuerte es el fémur (en el muslo), mientras que los más pequeños están dentro del oído (martillo, yunque y estribo). Los huesos no solo dan soporte, sino que producen células sanguíneas en su médula."
-    elif any(w in q_lower for w in ["músculos", "muscular", "fuerza", "movimiento"]):
-        answer = "💪 **El Sistema Muscular:**\nTenemos más de 600 músculos en el cuerpo. Se dividen en esqueléticos (los que movemos voluntariamente), cardíacos (el corazón) y lisos (los que mueven órganos internos como los intestinos)."
-    elif any(w in q_lower for w in ["riñón", "orina", "filtrar", "agua", "toxinas"]):
-        answer = "💧 **Los Riñones y el Sistema Excretor:**\nLos riñones actúan como los filtros principales del cuerpo. Filtran la sangre unas 40 veces al día, eliminando toxinas y exceso de agua en forma de orina para mantener el equilibrio químico interno."
+        answer = "🧠 **¡El supercerebro!**\nEs el centro de mando de todo tu cuerpo. Contiene cerca de 86 mil millones de neuronas que se comunican mediante impulsos eléctricos rapidísimos. Controla tus movimientos, tus recuerdos, tus emociones y hasta tus sueños cuando duermes. ¿Qué te sorprende más de la mente?"
+    
+    # 4. Digestión y estómago
+    elif any(w in q_lower for w in ["estómago", "digestión", "intestino", "comer", "comida", "hígado", "alimento"]):
+        answer = "🍏 **El viaje de la comida (Sistema Digestivo):**\n¡Es todo un proceso de transformación! Comienza en tu boca y recorre un tubo de unos 9 metros. El estómago usa ácidos fuertes para triturar los alimentos, y luego el intestino delgado absorbe todos los nutrientes que te dan energía. ¿Quieres saber cuánto tarda el cuerpo en digerir?"
+    
+    # 5. Pulmones y respiración
+    elif any(w in q_lower for w in ["pulmones", "respirar", "aire", "oxígeno", "respiratorio", "oxigeno"]):
+        answer = "🫁 **Los pulmones y el aire:**\nCada vez que respiras, tus pulmones expanden millones de pequeños saquitos llamados alvéolos para capturar el oxígeno del aire y pasarlo directo a la sangre, mientras expulsan el dióxido de carbono. ¡Es un ciclo automático vital!"
+    
+    # 6. Huesos y esqueleto
+    elif any(w in q_lower for w in ["huesos", "esqueleto", "fémur", "columna", "articulaciones", "ehuesos", "hueso"]):
+        answer = "🦴 **El sistema óseo (¡Tus huesos!):**\nUn adulto tiene 206 huesos. El más largo y fuerte es el fémur en la pierna. Aunque parecen simples estructuras duras, ¡están vivos!, se regeneran constantemente y en su interior (la médula ósea) se producen las células de la sangre."
+    
+    # 7. Músculos
+    elif any(w in q_lower for w in ["músculos", "muscular", "fuerza", "movimiento", "musculos"]):
+        answer = "💪 **El sistema muscular:**\nTenemos más de 600 músculos. Gracias a ellos podemos sonreír, caminar, correr y levantar objetos. Trabajan en equipo con los huesos como si fueran palancas. ¿Sabías que para sonreír usas muchos menos músculos que para enojarte?"
+    
+    # 8. Riñones y sistema excretor
+    elif any(w in q_lower for w in ["riñón", "riñones", "orina", "filtrar", "agua", "toxinas"]):
+        answer = "💧 **Los riñones, tus filtros naturales:**\nTus riñones limpian y filtran la sangre de tu cuerpo unas 40 veces al día, eliminando los desechos y el exceso de líquido en forma de orina. Por eso es tan importante tomar agua regularmente para cuidarlos."
+    
+    # 9. Piel y sentido del tacto
+    elif any(w in q_lower for w in ["piel", "tacto", "órgano más grande", "sudor"]):
+        answer = "✨ **La piel, el órgano más grande:**\n¡Así es! La piel cubre todo tu cuerpo, te protege de las bacterias, regula tu temperatura mediante el sudor y te permite sentir el tacto, el frío y el calor gracias a millones de terminaciones nerviosas."
+    
+    # 3. Respuesta por defecto más amable si no coincide con las anteriores
     else:
-        answer = f"🔍 Es una excelente pregunta sobre el cuerpo humano. El organismo es una red compleja de sistemas interconectados (como el endocrino, inmunológico y tegumentario) que trabajan en armonía (homeostasis). ¿Te gustaría profundizar en algún órgano o función específica relacionada con tu consulta sobre *'{user_question}'*?"
+        answer = f"🤔 Es una pregunta muy interesante. El cuerpo humano es tan asombroso que conecta muchísimos sistemas a la vez. Aunque no tengo una respuesta exacta para *'{user_question}'*, te invito a preguntarme sobre órganos específicos como el corazón, el cerebro, los pulmones, los huesos o la digestión. ¡Dime cuál te llama más la atención!"
 
     # Mostrar y guardar la respuesta generada
     with st.chat_message("assistant"):
