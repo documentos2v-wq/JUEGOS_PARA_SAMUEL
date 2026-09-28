@@ -2,32 +2,33 @@ import streamlit as st
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Portal de Samuel - Juegos & Asistente de Salud",
-    page_icon="🤖",
+    page_title="Portal de Samuel - Juegos y Salud",
+    page_icon="⚡",
     layout="wide"
 )
 
-# Estilo para limpiar la interfaz
+# Estilo global para limpiar la interfaz de Streamlit
 st.markdown("""
     <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Menú lateral para navegar entre el juego y el chat de salud
-app_mode = st.sidebar.selectbox(
-    "Selecciona una opción:",
-    ["🧠 Reto Mental Infinito", "💬 Asistente de Consejos de Salud"]
-)
+st.title("⚡ Portal Interactivo de Samuel")
 
-if app_mode == "🧠 Reto Mental Infinito":
-    # --- JUEGO DE PREGUNTAS CAPCIOSAS A PANTALLA COMPLETA ---
+# Pestañas principales para separar el juego y el chat de salud limpiamente
+tab1, tab2 = st.tabs(["🧠 Reto Mental Infinito", "💬 Chat de Consejos de Salud"])
+
+with tab1:
+    st.subheader("Reto Mental: Preguntas Capciosas y Adivinanzas (Modo Infinito)")
+    
+    # Juego enbebido con el emoji interactivo
     game_html = """
     <!DOCTYPE html>
     <html lang="es">
@@ -37,26 +38,26 @@ if app_mode == "🧠 Reto Mental Infinito":
         <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body {
-                background-color: #000000;
+                background-color: #0b0f19;
                 color: #f8fafc;
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                width: 100vw;
-                height: 85vh;
-                padding: 20px 40px;
-                overflow: hidden;
+                width: 100%;
+                height: 520px;
+                padding: 20px;
+                border-radius: 14px;
+                border: 2px solid #38bdf8;
             }
             .stats {
                 display: flex;
                 justify-content: space-between;
-                font-size: 20px;
+                font-size: 18px;
                 font-weight: bold;
                 color: #38bdf8;
                 border-bottom: 2px solid #1e293b;
-                padding-bottom: 10px;
-                width: 100%;
+                padding-bottom: 8px;
             }
             .question-container {
                 flex-grow: 1;
@@ -65,13 +66,13 @@ if app_mode == "🧠 Reto Mental Infinito":
                 justify-content: center;
                 align-items: center;
                 width: 100%;
-                max-width: 900px;
+                max-width: 800px;
                 margin: 0 auto;
             }
             .interactive-emoji {
-                font-size: 70px;
+                font-size: 65px;
                 text-align: center;
-                margin-bottom: 8px;
+                margin-bottom: 6px;
             }
             .thinking-anim { animation: thinkMotion 1.2s infinite alternate ease-in-out; }
             @keyframes thinkMotion {
@@ -81,7 +82,7 @@ if app_mode == "🧠 Reto Mental Infinito":
             .happy-anim { animation: happyMotion 0.5s infinite alternate ease-in-out; }
             @keyframes happyMotion {
                 0% { transform: translateY(0) scale(1.2); }
-                100% { transform: translateY(-15px) scale(1.3); }
+                100% { transform: translateY(-12px) scale(1.3); }
             }
             .angry-anim { animation: angryMotion 0.3s infinite alternate ease-in-out; }
             @keyframes angryMotion {
@@ -90,31 +91,31 @@ if app_mode == "🧠 Reto Mental Infinito":
             }
             .question-box {
                 background: #0f172a;
-                padding: 22px;
-                border-radius: 14px;
-                font-size: 22px;
+                padding: 20px;
+                border-radius: 12px;
+                font-size: 20px;
                 color: #ffffff;
                 border-left: 6px solid #f59e0b;
                 line-height: 1.4;
                 text-align: center;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
                 width: 100%;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             }
             .options-container {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 15px;
+                gap: 12px;
                 width: 100%;
             }
             .option-btn {
                 background: #1e293b;
                 color: white;
                 border: 2px solid #334155;
-                padding: 16px;
-                font-size: 16px;
+                padding: 14px;
+                font-size: 15px;
                 font-weight: bold;
-                border-radius: 12px;
+                border-radius: 10px;
                 cursor: pointer;
                 transition: 0.2s;
                 text-align: left;
@@ -130,19 +131,19 @@ if app_mode == "🧠 Reto Mental Infinito":
                 justify-content: space-between;
                 align-items: center;
                 width: 100%;
-                min-height: 50px;
+                min-height: 40px;
                 border-top: 2px solid #1e293b;
-                padding-top: 10px;
+                padding-top: 8px;
             }
-            #feedback { font-size: 20px; font-weight: bold; }
+            #feedback { font-size: 18px; font-weight: bold; }
             #next-btn {
                 background: linear-gradient(45deg, #22c55e, #16a34a);
                 color: white;
                 border: none;
-                padding: 10px 28px;
+                padding: 10px 24px;
                 font-size: 16px;
                 font-weight: bold;
-                border-radius: 30px;
+                border-radius: 25px;
                 cursor: pointer;
                 display: none;
             }
@@ -227,52 +228,47 @@ if app_mode == "🧠 Reto Mental Infinito":
     </body>
     </html>
     """
-    st.components.v1.html(game_html, height=650, scrolling=False)
+    st.components.v1.html(game_html, height=540, scrolling=False)
 
-else:
-    # --- CHAT DE CONSEJOS DE SALUD AUTOMÁTICO ---
-    st.title("💬 Asistente Virtual de Consejos de Salud")
-    st.write("Escribe tu consulta sobre bienestar, nutrición, hábitos saludables o prevención y recibe respuestas automáticas al instante.")
+with tab2:
+    st.subheader("💬 Asistente Virtual de Consejos de Salud")
+    st.write("Escribe tus dudas sobre bienestar, nutrición, descanso o hábitos de vida y obtén respuestas automáticas al instante.")
     
-    # Aviso médico importante
-    st.info("⚠️ **Aviso importante:** Este asistente ofrece pautas generales de bienestar y no sustituye el diagnóstico, tratamiento o recomendación de un médico profesional.")
+    st.info("⚠️ **Aviso legal:** Este chat ofrece orientación general de bienestar y salud preventiva, pero no sustituye el diagnóstico ni la consulta de un médico especialista.")
 
-    # Inicializar historial del chat en la sesión de Streamlit
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "assistant", "content": "¡Hola! Soy tu asistente de bienestar. ¿Qué duda o consejo de salud te gustaría consultar hoy?"}
+    # Inicializar el historial de conversación
+    if "health_messages" not in st.session_state:
+        st.session_state.health_messages = [
+            {"role": "assistant", "content": "¡Hola! Soy tu asistente virtual de bienestar. ¿Qué consulta o consejo de salud te gustaría explorar hoy?"}
         ]
 
-    # Mostrar historial de mensajes en pantalla
-    for message in st.session_state.messages:
+    # Mostrar el historial de mensajes
+    for message in st.session_state.health_messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Entrada de texto del usuario en la parte inferior
-    if prompt := st.chat_input("Escribe tu pregunta sobre salud aquí..."):
-        # Agregar mensaje del usuario al historial
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    # Entrada de texto del usuario
+    if user_input := st.chat_input("Escribe tu pregunta de salud aquí..."):
+        st.session_state.health_messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
-            st.markdown(prompt)
+            st.markdown(user_input)
 
-        # Generar respuesta automática inteligente basada en palabras clave
-        user_query = prompt.lower()
-        if any(word in user_query for word in ["agua", "hidratación", "beber", "tos"]):
-            response = "💧 **Consejo de hidratación:** Es recomendable beber entre 2 y 2.5 litros de agua al día para mantener tus órganos funcionando de manera óptima y tu piel saludable. ¡Intenta llevar siempre una botella contigo!"
-        elif any(word in user_query for word in ["sueño", "dormir", "cansancio", "fatiga", "insomnio"]):
-            response = "😴 **Consejo de descanso:** Los adultos necesitan entre 7 y 8 horas de sueño profundo por noche. Procura apagar las pantallas al menos 30 minutos antes de acostarte y mantén tu habitación fresca y oscura."
-        elif any(word in user_query for word in ["estrés", "ansiedad", "relajar", "calmar"]):
-            response = "🧘 **Consejo antiestrés:** Prueba la técnica de respiración consciente: inhala profundamente durante 4 segundos, sostén el aire durante 4 segundos y exhala lentamente en 4 segundos. Repítelo 5 veces para reducir la tensión."
-        elif any(word in user_query for word in ["comer", "dieta", "nutrición", "alimento", "saludable"]):
-            response = "🥗 **Consejo nutricional:** Prioriza alimentos frescos como verduras, frutas y proteínas magras. Reduce los azúcares refinados y ultraprocesados, y recuerda que una dieta equilibrada es la base de una buena inmunidad."
-        elif any(word in user_query for word in ["ejercicio", "deporte", "caminar", "actividad"]):
-            response = "🏃 **Consejo de actividad física:** La OMS recomienda al menos 150 minutos de ejercicio moderado a la semana (como caminar a buen ritmo, nadar o trotar). ¡Comienza con caminatas diarias de 20 minutos!"
+        # Generar respuesta automática inteligente basada en el contenido
+        query = user_input.lower()
+        if any(w in query for w in ["agua", "hidratación", "beber", "tos"]):
+            reply = "💧 **Consejo de hidratación:** Se aconseja consumir entre 2 y 2.5 litros de agua al día para mantener un buen rendimiento físico y mental. ¡Lleva siempre agua contigo!"
+        elif any(w in query for w in ["sueño", "dormir", "cansancio", "insomnio"]):
+            reply = "😴 **Consejo de descanso:** Un adulto saludable requiere de 7 a 8 horas de sueño continuo. Evita usar dispositivos electrónicos justo antes de dormir para mejorar la melatonina."
+        elif any(w in query for w in ["estrés", "ansiedad", "relajar", "calmar"]):
+            reply = "🧘 **Consejo antiestrés:** Prueba la respiración diafragmática: inhala en 4 segundos, mantén 4 segundos y exhala en 4 segundos. Te ayudará a disminuir la frecuencia cardíaca de inmediato."
+        elif any(w in query for w in ["comer", "dieta", "nutrición", "alimento", "saludable"]):
+            reply = "🥗 **Consejo nutricional:** Enfócate en alimentos reales y ricos en fibra (verduras, frutas, granos enteros). Reduce el consumo de azúcares y grasas saturadas."
+        elif any(w in query for w in ["ejercicio", "deporte", "caminar", "actividad"]):
+            reply = "🏃 **Consejo de actividad física:** Intenta realizar al menos 30 minutos diarios de caminata rápida o actividad aeróbica para cuidar tu salud cardiovascular."
         else:
-            response = f"Gracias por tu consulta sobre *'{prompt}'*. Como recomendación general de bienestar, te sugiero mantener una dieta equilibrada, hacer ejercicio con regularidad, descansar bien y, si persisten las molestias, acudir a un médico especialista para una evaluación personalizada."
+            reply = f"Comprendo tu consulta sobre *'{user_input}'*. Para mantener una buena salud general, te sugiero priorizar una dieta equilibrada, mantenerte hidratado, dormir bien y, ante cualquier síntoma persistente, visitar a un médico profesional."
 
-        # Mostrar la respuesta del asistente
         with st.chat_message("assistant"):
-            st.markdown(response)
+            st.markdown(reply)
         
-        # Guardar la respuesta en el historial
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.health_messages.append({"role": "assistant", "content": reply})
