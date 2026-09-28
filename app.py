@@ -9,25 +9,51 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Estilos CSS limpios y modernos para móviles
+# Estilos CSS con colores bonitos, modernos y adaptados a móviles
 st.markdown("""
     <style>
+    /* Fondo general suave con un toque moderno */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    }
     .main { padding: 0rem 0.5rem; }
-    h1 { font-size: 1.7rem !important; color: #0d6efd; text-align: center; margin-bottom: 0.1rem; }
-    p { font-size: 0.95rem !important; }
-    .stChatMessage { border-radius: 10px; padding: 0.4rem; margin-bottom: 0.6rem; }
+    
+    /* Título principal estilizado */
+    h1 {
+        font-size: 1.8rem !important;
+        color: #0f4c81;
+        text-align: center;
+        margin-bottom: 0.1rem;
+        font-weight: 700;
+    }
+    
+    p { font-size: 0.95rem !important; color: #333333; }
+    
+    /* Estilo elegante para las burbujas del chat */
+    .stChatMessage {
+        border-radius: 14px;
+        padding: 0.6rem;
+        margin-bottom: 0.8rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    /* Caja de advertencia estética */
+    .stAlert {
+        border-radius: 10px;
+        border-left: 5px solid #0f4c81;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 st.title("🧬 Asistente TerrahealtH")
-st.markdown("<p style='text-align: center; color: #555;'>Respuestas directas, rápidas y específicas.</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #5a6a85;'>✨ Tu guía inteligente de anatomía y salud con respuestas rápidas y específicas. ✨</p>", unsafe_allow_html=True)
 
 st.info("⚠️ **Aviso:** Fines educativos y científicos. No sustituye la consulta médica profesional.")
 
-# Inicializar historial de chat local
+# Inicializar historial de chat local con el saludo gracioso y emoticons bonitos
 if "local_chat_messages" not in st.session_state:
     st.session_state.local_chat_messages = [
-        {"role": "assistant", "content": "¡Hola, Samuel! 👋 Soy **TerrahealtH**. Pregúntame sobre cualquier sistema u órgano (como el hígado, páncreas, rodilla, etc.) y te daré una respuesta corta y directa."}
+        {"role": "assistant", "content": "¡Hola terrícola! 👽🤖 Soy tu asistente **TerrahealtH** 🌍✨. Pregúntame sobre cualquier sistema u órgano (como el hígado 🩺, páncreas 🧬, rodilla 🦵, etc.) y te daré una respuesta corta, directa y muy útil 🚀."}
     ]
 
 # Mostrar historial
@@ -39,7 +65,7 @@ def normalizar_texto(texto):
     return ''.join(c for c in unicodedata.normalize('NFD', texto) if unicodedata.category(c) != 'Mn').lower()
 
 # Entrada de texto del usuario
-if user_question := st.chat_input("Escribe tu pregunta directa..."):
+if user_question := st.chat_input("Escribe tu pregunta directa... ✍️"):
     st.session_state.local_chat_messages.append({"role": "user", "content": user_question})
     with st.chat_message("user"):
         st.markdown(user_question)
@@ -49,15 +75,15 @@ if user_question := st.chat_input("Escribe tu pregunta directa..."):
 
     # Saludos y cortesía cortos
     if any(w in q_norm for w in ["hola", "saludos", "buenas", "que tal", "hey"]):
-        answer = "¡Hola, Samuel! 👋 ¿Qué órgano o sistema deseas consultar en TerrahealtH?"
+        answer = "¡Hola terrícola! 👽 ¿Qué órgano 🫀 o sistema 🧬 deseas consultar hoy en TerrahealtH?"
     elif any(w in q_norm for w in ["gracias", "excelente", "genial"]):
-        answer = "¡De nada! ¿Tienes alguna otra consulta específica?"
+        answer = "¡De nada, terrícola! ✨ ¿Tienes alguna otra consulta anatómica o de salud? 🚀"
 
     # 1. ÓRGANOS Y ESTRUCTURAS ESPECÍFICAS
     elif "higado" in q_norm:
         answer = "🩺 **El Hígado:**\n* **Función:** Órgano interno más grande; desintoxica la sangre, metaboliza nutrientes, almacena glucógeno y produce bilis[cite: 11].\n* **Enfermedades comunes:** Hígado graso, hepatitis, cirrosis.\n* **Prevención/Combate:** Evitar exceso de alcohol, mantener dieta equilibrada y control médico."
     elif "pancreas" in q_norm:
-        answer = "🩺 **El Páncreas:**\n* **Función:** Glándula mixta; función endocrina (produce insulina y glucagón) y exocrina (jugos pancreáticos para la digestión)[cite: 11].\n* **Enfermedades comunes:** Pancreatitis, diabetes, cáncer de páncreas.\n* **Prevención/Combate:** Dieta baja en grasas, evitar alcohol y chequeos de glucosa."
+        answer = "🧬 **El Páncreas:**\n* **Función:** Glándula mixta; función endocrina (produce insulina y glucagón) y exocrina (jugos pancreáticos para la digestión)[cite: 11].\n* **Enfermedades comunes:** Pancreatitis, diabetes, cáncer de páncreas.\n* **Prevención/Combate:** Dieta baja en grasas, evitar alcohol y chequeos de glucosa."
     elif "corazon" in q_norm:
         answer = "❤️ **El Corazón:**\n* **Función:** Bombea sangre oxigenada y nutrientes por todo el sistema circulatorio[cite: 10, 19].\n* **Enfermedades comunes:** Hipertensión, infarto agudo de miocardio, arritmias[cite: 19].\n* **Prevención/Combate:** Ejercicio cardiovascular, dieta saludable y control de presión arterial."
     elif "riñon" in q_norm or "riñones" in q_norm:
@@ -89,7 +115,7 @@ if user_question := st.chat_input("Escribe tu pregunta directa..."):
     elif "sistema reproductor" in q_norm:
         answer = "👶 **Sistema Reproductor:**\n* **Función:** Encargado de la perpetuación de la especie mediante células sexuales y hormonas[cite: 15].\n* **Enfermedades comunes:** ITS, trastornos prostáticos u ováricos.\n* **Prevención/Combate:** Protección adecuada y chequeos médicos periódicos."
     else:
-        answer = f"🔍 Consulta sobre *'{user_question}'*. Por favor, indícame un órgano (ej. hígado, páncreas, corazón) o sistema específico (ej. esquelético, respiratorio, digestivo) para darte la información exacta."
+        answer = f"🔍 Consulta sobre *'{user_question}'*. Por favor, indícame un órgano 🫀 (ej. hígado, páncreas, corazón) o sistema específico 🧬 (ej. esquelético, respiratorio, digestivo) para darte la información exacta."
 
     # Mostrar y guardar respuesta
     with st.chat_message("assistant"):
