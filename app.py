@@ -2,23 +2,58 @@ import streamlit as st
 import time
 from google import genai
 
-# Configuración de la página
+# Configuración de la página optimizada para dispositivos móviles
 st.set_page_config(
-    page_title="Asistente Experto del Cuerpo Humano con IA",
+    page_title="Asistente Experto del Cuerpo Humano",
     page_icon="🧬",
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-st.title("🧬 Asistente Inteligente del Cuerpo Humano (Powered by AI)")
-st.write("Pregúntame sobre cualquier sistema (esquelético, nervioso, endocrino, respiratorio, circulatorio, digestivo, inmunológico, muscular, excretor, reproductor), sus funciones, posibles enfermedades y cómo prevenirlas o combatirlas.")
+# Estilos CSS personalizados para mejorar la visualización en celulares
+st.markdown("""
+    <style>
+    /* Ajustes generales para móviles */
+    .main {
+        padding: 0rem 0.5rem;
+    }
+    
+    /* Contenedor del título principal */
+    h1 {
+        font-size: 1.8rem !important;
+        color: #0d6efd;
+        text-align: center;
+        margin-bottom: 0.2rem;
+    }
+    
+    p {
+        font-size: 1rem !important;
+    }
+    
+    /* Estilo amigable para los mensajes del chat en dispositivos móviles */
+    .stChatMessage {
+        border-radius: 12px;
+        padding: 0.5rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    /* Adaptar la barra de entrada de texto para celulares */
+    .stChatInputContainer {
+        padding-bottom: 1rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-st.info("⚠️ **Aviso informativo:** Este chat tiene fines educativos y científicos. No sustituye la consulta médica profesional.")
+st.title("🧬 Asistente del Cuerpo Humano")
+st.markdown("<p style='text-align: center; color: #555;'>Tu guía inteligente de anatomía, sistemas, funciones y salud.</p>", unsafe_allow_html=True)
+
+st.info("⚠️ **Aviso:** Fines educativos y científicos. No sustituye la consulta médica profesional.")
 
 # Obtener la clave de API desde los secretos de Streamlit
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 
 if not api_key:
-    st.error("⚠️ Falta configurar la `GEMINI_API_KEY` en los secretos de Streamlit Cloud para que la IA responda.")
+    st.error("⚠️ Falta configurar la `GEMINI_API_KEY` en los secretos de Streamlit Cloud.")
 else:
     # Inicializar el cliente de Google GenAI
     client = genai.Client(api_key=api_key)
@@ -26,7 +61,7 @@ else:
     # Inicializar el historial del chat en la sesión
     if "ai_systems_chat" not in st.session_state:
         st.session_state.ai_systems_chat = [
-            {"role": "assistant", "content": "¡Hola, Samuel! 👋 Soy tu asistente médico y biológico inteligente. Ya tengo integradas las bases de todos los sistemas del cuerpo humano. Pregúntame sobre las funciones de cualquier sistema, sus enfermedades más comunes y cómo prevenirlas o combatirlas."}
+            {"role": "assistant", "content": "¡Hola, Samuel! 👋 Soy tu asistente médico inteligente. Pregúntame sobre cualquier sistema del cuerpo, sus funciones, enfermedades o cómo prevenirlas."}
         ]
 
     # Mostrar el historial de mensajes en la interfaz
@@ -34,16 +69,16 @@ else:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Entrada de texto del usuario
-    if user_prompt := st.chat_input("Escribe tu pregunta sobre anatomía, funciones o enfermedades..."):
+    # Entrada de texto del usuario adaptada a móviles
+    if user_prompt := st.chat_input("Escribe tu consulta médica o anatómica..."):
         # Guardar y mostrar el mensaje del usuario
         st.session_state.ai_systems_chat.append({"role": "user", "content": user_prompt})
         with st.chat_message("user"):
             st.markdown(user_prompt)
 
-        # Generar respuesta utilizando la inteligencia artificial de Gemini con reintentos automáticos
+        # Generar respuesta utilizando la inteligencia artificial con reintentos automáticos
         with st.chat_message("assistant"):
-            with st.spinner("Consultando bases de conocimiento médico y anatómico..."):
+            with st.spinner("Consultando bases médicas..."):
                 system_instruction = (
                     "Eres un asistente médico, biológico y científico experto en anatomía humana y salud. "
                     "Cuando el usuario pregunte por cualquier sistema del cuerpo (esquelético, nervioso, endocrino, "
@@ -75,9 +110,9 @@ else:
                         break
                     except Exception as e:
                         if intento < max_intentos - 1:
-                            time.sleep(2) # Esperar 2 segundos antes de reintentar si hay congestión 503
+                            time.sleep(2)
                         else:
-                            ai_reply = f"❌ Ocurrió un error temporal por alta demanda en el servidor. Por favor, intenta enviar tu mensaje nuevamente en unos segundos. (Detalle: {e})"
+                            ai_reply = f"❌ Ocurrió un error temporal por alta demanda. Por favor, intenta de nuevo en unos segundos. (Detalle: {e})"
 
                 st.markdown(ai_reply)
                 
