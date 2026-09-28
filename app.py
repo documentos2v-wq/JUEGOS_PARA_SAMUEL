@@ -51,9 +51,9 @@ else:
                         "Explica anatomía, funciones, órganos (como el páncreas, hígado, etc.) y causas de enfermedades de forma comprensible."
                     )
                     
-                    # Llamada utilizando el modelo estándar activo y compatible
+                    # Llamada actualizada al modelo gemini-3.8-flash
                     response = client.models.generate_content(
-                        model='gemini-2.0-flash',
+                        model='gemini-3.8-flash',
                         contents=user_prompt,
                         config={
                             'system_instruction': system_instruction,
