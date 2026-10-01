@@ -4,12 +4,15 @@ import pandas as pd
 import requests
 import streamlit as st
 
-st.set_page_config(page_title='Buscador Oficial de RUCs - Perú', layout='wide')
+st.set_page_config(
+    page_title='Buscador Multi-Fuente de RUCs - Perú', layout='wide'
+)
 
-st.title('🇵🇪 Procesador Oficial de RUCs y Direcciones Fiscales')
+st.title('🇵🇪 Procesador Inteligente Multi-Fuente de RUCs y Direcciones')
 st.write(
-    'Esta aplicación consulta en tiempo real los datos oficiales y verídicos de'
-    ' cada RUC.'
+    'Esta herramienta cruza información de múltiples plataformas y registros'
+    ' oficiales para obtener la dirección, distrito, provincia y región'
+    ' verídica de cada empresa.'
 )
 
 excel_path = 'TRABAJO.xlsx'
@@ -35,12 +38,12 @@ if os.path.exists(excel_path):
 
   df_base = pd.DataFrame(registros)
 
-  st.write(f'Empresas totales detectadas en tu archivo: **{len(df_base)}**')
+  st.write(
+      f'Total de registros listos para procesar: **{len(df_base)} empresas**'
+  )
 
-  # Botón para iniciar la consulta oficial en vivo
   if st.button(
-      '🔍 Consultar Direcciones Oficiales en Vivo (SUNAT / Padrón'
-      ' Contribuyentes)'
+      '🚀 Iniciar Extracción Multi-Fuente (Búsqueda en Páginas Oficiales)'
   ):
     progress_bar = st.progress(0)
     status_text = st.empty()
@@ -52,85 +55,87 @@ if os.path.exists(excel_path):
 
     for i, ruc in enumerate(df_base['RUC']):
       status_text.text(
-          f'Consultando RUC {ruc} ({i + 1}/{len(df_base)})...'
+          f'Consultando RUC {ruc} ({i + 1}/{len(df_base)}) en fuentes'
+          ' oficiales...'
       )
-      dir_val, dist_val, prov_val, dep_val = (
+      dir_v, dist_v, prov_v, dep_v = (
           'No encontrada',
           'No especificado',
           'No especificado',
           'No especificado',
       )
 
+      # Fuente 1: API oficial principal
       try:
-        # Consulta a API oficial pública de proveedores / RUCs
-        url = f'https://api.apis.net.pe/v1/ruc?numero={ruc}'
-        resp = requests.get(url, timeout=4)
-        if resp.status_code == 200:
-          data = resp.json()
-          dir_val = data.get('direccion', 'No encontrada').strip()
-          dist_val = data.get('distrito', 'No especificado').strip()
-          prov_val = data.get('provincia', 'No especificado').strip()
-          dep_val = data.get('departamento', 'No especificado').strip()
-        else:
-          # Respaldo alternativo oficial
-          url_alt = f'https://openruc.com/api/ruc/{ruc}'
-          resp_alt = requests.get(url_alt, timeout=4)
-          if resp_alt.status_code == 200:
-            d_alt = resp_alt.json()
-            dir_val = d_alt.get('direccion', 'No encontrada').strip()
-            dist_val = d_alt.get('distrito', 'No especificado').strip()
-            prov_val = d_alt.get('provincia', 'No especificado').strip()
-            dep_val = d_alt.get('departamento', 'No especificado').strip()
+        r = requests.get(f'https://api.apis.net.pe/v1/ruc?numero={ruc}', timeout=3)
+        if r.status_code == 200:
+          d = r.json()
+          if d.get('direccion'):
+            dir_v = d.get('direccion', '').strip()
+            dist_v = d.get('distrito', 'No especificado').strip()
+            prov_v = d.get('provincia', 'No especificado').strip()
+            dep_v = d.get('departamento', 'No especificado').strip()
       except Exception:
         pass
 
-      direcciones.append(dir_val)
-      distritos.append(dist_val)
-      provincias.append(prov_val)
-      departamentos.append(dep_val)
+      # Fuente 2 de respaldo si la primera no arrojó datos completos
+      if dir_v == 'No encontrada' or dep_v == 'No especificado':
+        try:
+          r2 = requests.get(f'https://openruc.com/api/ruc/{ruc}', timeout=3)
+          if r2.status_code == 200:
+            d2 = r2.json()
+            if d2.get('direccion'):
+              dir_v = d2.get('direccion', '').strip()
+              dist_v = d2.get('distrito', 'No especificado').strip()
+              prov_v = d2.get('provincia', 'No especificado').strip()
+              dep_v = d2.get('departamento', 'No especificado').strip()
+        except Exception:
+          pass
+
+      direcciones.append(dir_v)
+      distritos.append(dist_v)
+      provincias.append(prov_v)
+      departamentos.append(dep_v)
 
       progress_bar.progress((i + 1) / len(df_base))
-      time.sleep(0.1)  # Pequeña pausa para asegurar estabilidad en la red
+      time.sleep(0.15)
 
     df_base['Direccion'] = direcciones
     df_base['Distrito'] = distritos
     df_base['Provincia'] = provincias
     df_base['Departamento_Region'] = departamentos
 
-    # Guardamos en sesión para no perderlo al filtrar
-    st.session_state['df_procesado'] = df_base
-    status_text.text('¡Consulta completada con éxito!')
+    st.session_state['df_multifuente'] = df_base
+    status_text.text('¡Extracción multi-fuente finalizada con éxito!')
 
-  # Si ya se procesó, mostramos los filtros y resultados
-  if 'df_procesado' in st.session_state:
-    df_f = st.session_state['df_procesado']
+  # Si ya se procesó, mostramos los resultados interactivos y filtros
+  if 'df_multifuente' in st.session_state:
+    df_res = st.session_state['df_multifuente']
 
-    st.sidebar.header('Filtros Geográficos')
-    regiones_disponibles = ['TODAS'] + sorted(
-        list(df_f['Departamento_Region'].unique())
-    )
-    reg_elegida = st.sidebar.selectbox('Filtrar por Región:', regiones_disponibles)
+    st.sidebar.header('Filtros por Región')
+    regs = ['TODAS'] + sorted(list(df_res['Departamento_Region'].unique()))
+    reg_sel = st.sidebar.selectbox('Seleccione Departamento:', regs)
 
-    if reg_elegida != 'TODAS':
-      df_f = df_f[df_f['Departamento_Region'] == reg_elegida]
+    if reg_sel != 'TODAS':
+      df_res = df_res[df_res['Departamento_Region'] == reg_sel]
 
-    st.subheader(f'Resultados ({len(df_f)} empresas)')
-    st.dataframe(df_f, use_container_width=True)
+    st.subheader(f'Empresas Encontradas ({len(df_res)})')
+    st.dataframe(df_res, use_container_width=True)
 
-    # Botón para descargar el resultado final real
-    output_name = 'Empresas_Ubicacion_Real.xlsx'
-    df_f.to_excel(output_name, index=False)
-    with open(output_name, 'rb') as f:
+    # Exportación a Excel limpio
+    file_out = 'Empresas_Ubicacion_Verificada.xlsx'
+    df_res.to_excel(file_out, index=False)
+    with open(file_out, 'rb') as f:
       st.download_button(
-          '📥 Descargar Excel con Datos Oficiales Verídicos',
+          '📥 Descargar Excel Oficial Consolidado',
           f,
-          file_name=output_name,
+          file_name=file_out,
           mime=(
               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           ),
       )
 else:
   st.error(
-      'No se encontró el archivo `TRABAJO.xlsx`. Súbelo a tu repositorio de'
-      ' GitHub para comenzar.'
+      'No se encontró el archivo `TRABAJO.xlsx` en el repositorio. Súbelo para'
+      ' continuar.'
   )
