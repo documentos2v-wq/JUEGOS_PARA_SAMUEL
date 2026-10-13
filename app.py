@@ -1,141 +1,266 @@
 import os
-import time
-import pandas as pd
-import requests
 import streamlit as st
 
+# Configuración de la página con diseño ancho y moderno
 st.set_page_config(
-    page_title='Buscador Multi-Fuente de RUCs - Perú', layout='wide'
+    page_title="HASSELTH GLOBAL | Catálogo de Casacas",
+    page_icon="🧥",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-st.title('🇵🇪 Procesador Inteligente Multi-Fuente de RUCs y Direcciones')
-st.write(
-    'Esta herramienta cruza información de múltiples plataformas y registros'
-    ' oficiales para obtener la dirección, distrito, provincia y región'
-    ' verídica de cada empresa.'
+# --- DISEÑO CSS PERSONALIZADO (Estilo moderno tipo Google/E-commerce) ---
+st.markdown(
+    """
+    <style>
+    /* Estilo general y tipografía limpia */
+    .main {
+        background-color: #f8fafc;
+    }
+    
+    /* Tarjetas de productos estilizadas */
+    .product-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-bottom: 20px;
+    }
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Encabezado principal */
+    .header-container {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 30px;
+        border-radius: 16px;
+        color: white;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .header-container h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+    .header-container p {
+        color: #94a3b8;
+        font-size: 1.1rem;
+        margin-top: 10px;
+    }
+    
+    /* Estilos de precios */
+    .price-tag {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0ea5e9;
+    }
+    </style>
+""",
+    unsafe_allow_html=True,
 )
 
-excel_path = 'TRABAJO.xlsx'
+# --- CARPETA PARA GUARDAR FOTOS ---
+UPLOAD_DIR = "imagenes_casacas"
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
 
-if os.path.exists(excel_path):
-  xls = pd.ExcelFile(excel_path)
-  df = pd.read_excel(excel_path, sheet_name=xls.sheet_names[0])
+# --- INICIALIZAR BASE DE DATOS DE LA SESIÓN ---
+if "productos" not in st.session_state:
+    st.session_state.productos = [
+        {
+            "id": 1,
+            "nombre": "Casaca Impermeable Urbana",
+            "estilo": "Impermeable",
+            "precio": 150.00,
+            "tallas": ["S", "M", "L", "XL"],
+            "descripcion": "Ideal para la temporada de invierno, abrigadora y moderna.",
+            "imagen": None,
+        },
+        {
+            "id": 2,
+            "nombre": "Casaca de Cuero Clásica",
+            "estilo": "Cuero",
+            "precio": 280.00,
+            "tallas": ["M", "L", "XL"],
+            "descripcion": "Cuero sintético de alta durabilidad y diseño ejecutivo.",
+            "imagen": None,
+        },
+        {
+            "id": 3,
+            "nombre": "Casaca Térmica Acolchada",
+            "estilo": "Térmica / Deportiva",
+            "precio": 190.00,
+            "tallas": ["S", "M", "L"],
+            "descripcion": "Diseño ligero con retención de calor avanzada.",
+            "imagen": None,
+        },
+    ]
 
-  # Limpieza y extracción de RUCs de 11 dígitos
-  registros = []
-  h_raw = str(df.columns[1]).replace('\xa0', '').strip()
-  ruc_h = h_raw.split(':')[0].strip() if ':' in h_raw else h_raw
-  emp_h = h_raw.split(':')[1].strip() if ':' in h_raw else h_raw
-  monto_h = str(df.columns[2]).replace('\xa0', '').strip()
-  registros.append({'Empresa': emp_h, 'Monto': monto_h, 'RUC': ruc_h})
+# --- PANEL LATERAL DE ADMINISTRACIÓN ---
+st.sidebar.markdown("## ⚙️ Panel HASSELTH")
+st.sidebar.markdown("Administra los productos de tu tienda con facilidad.")
 
-  for _, row in df.iterrows():
-    val_raw = str(row.iloc[1]).replace('\xa0', '').strip()
-    ruc = val_raw.split(':')[0].strip() if ':' in val_raw else val_raw
-    emp = val_raw.split(':')[1].strip() if ':' in val_raw else val_raw
-    monto = str(row.iloc[2]).replace('\xa0', '').strip()
-    registros.append({'Empresa': emp, 'Monto': monto, 'RUC': ruc})
+with st.sidebar.expander("➕ Agregar Nueva Casaca"):
+    with st.form("form_nueva_casaca", clear_on_submit=True):
+        nuevo_nombre = st.text_input("Nombre de la casaca")
+        nuevo_estilo = st.selectbox(
+            "Estilo",
+            [
+                "Impermeable",
+                "Cuero",
+                "Térmica / Deportiva",
+                "Casual",
+                "Cortaviento",
+            ],
+        )
+        nuevo_precio = st.number_input(
+            "Precio (S/)", min_value=0.0, value=120.0, step=10.0
+        )
+        nuevas_tallas = st.multiselect(
+            "Tallas disponibles",
+            ["S", "M", "L", "XL", "XXL"],
+            default=["M", "L"],
+        )
+        nueva_desc = st.text_area("Breve descripción")
+        archivo_foto = st.file_uploader(
+            "Foto de la casaca", type=["jpg", "jpeg", "png"]
+        )
 
-  df_base = pd.DataFrame(registros)
+        submit_btn = st.form_submit_button("Guardar en el Catálogo")
 
-  st.write(
-      f'Total de registros listos para procesar: **{len(df_base)} empresas**'
-  )
+        if submit_btn:
+            if nuevo_nombre:
+                ruta_imagen = None
+                if archivo_foto is not None:
+                    ruta_imagen = os.path.join(UPLOAD_DIR, archivo_foto.name)
+                    with open(ruta_imagen, "wb") as f:
+                        f.write(archivo_foto.getbuffer())
 
-  if st.button(
-      '🚀 Iniciar Extracción Multi-Fuente (Búsqueda en Páginas Oficiales)'
-  ):
-    progress_bar = st.progress(0)
-    status_text = st.empty()
+                nuevo_id = (
+                    max([p["id"] for p in st.session_state.productos]) + 1
+                    if st.session_state.productos
+                    else 1
+                )
+                st.session_state.productos.append(
+                    {
+                        "id": nuevo_id,
+                        "nombre": nuevo_nombre,
+                        "estilo": nuevo_estilo,
+                        "precio": float(nuevo_precio),
+                        "tallas": nuevas_tallas,
+                        "descripcion": nueva_desc,
+                        "imagen": ruta_imagen,
+                    }
+                )
+                st.success(f"¡{nuevo_nombre} agregada correctamente!")
+                st.rerun()
+            else:
+                st.error("Por favor ingresa al menos el nombre del producto.")
 
-    direcciones = []
-    distritos = []
-    provincias = []
-    departamentos = []
+# Filtro lateral por estilo
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 🔍 Filtrar Catálogo")
+estilos_disponibles = ["Todos"] + list(
+    set([p["estilo"] for p in st.session_state.productos])
+)
+filtro_estilo = st.sidebar.selectbox(
+    "Selecciona un estilo", estilos_disponibles
+)
 
-    for i, ruc in enumerate(df_base['RUC']):
-      status_text.text(
-          f'Consultando RUC {ruc} ({i + 1}/{len(df_base)}) en fuentes'
-          ' oficiales...'
-      )
-      dir_v, dist_v, prov_v, dep_v = (
-          'No encontrada',
-          'No especificado',
-          'No especificado',
-          'No especificado',
-      )
+# --- CABECERA VISUAL DE LA TIENDA ---
+st.markdown(
+    """
+    <div class="header-container">
+        <h1>🧥 HASSELTH GLOBAL</h1>
+        <p>Catálogo Exclusivo de Casacas • Estilo, Calidad y Confort</p>
+    </div>
+""",
+    unsafe_allow_html=True,
+)
 
-      # Fuente 1: API oficial principal
-      try:
-        r = requests.get(f'https://api.apis.net.pe/v1/ruc?numero={ruc}', timeout=3)
-        if r.status_code == 200:
-          d = r.json()
-          if d.get('direccion'):
-            dir_v = d.get('direccion', '').strip()
-            dist_v = d.get('distrito', 'No especificado').strip()
-            prov_v = d.get('provincia', 'No especificado').strip()
-            dep_v = d.get('departamento', 'No especificado').strip()
-      except Exception:
-        pass
+# --- FILTRADO DE PRODUCTOS ---
+productos_a_mostrar = st.session_state.productos
+if filtro_estilo != "Todos":
+    productos_a_mostrar = [
+        p for p in productos_a_mostrar if p["estilo"] == filtro_estilo
+    ]
 
-      # Fuente 2 de respaldo si la primera no arrojó datos completos
-      if dir_v == 'No encontrada' or dep_v == 'No especificado':
-        try:
-          r2 = requests.get(f'https://openruc.com/api/ruc/{ruc}', timeout=3)
-          if r2.status_code == 200:
-            d2 = r2.json()
-            if d2.get('direccion'):
-              dir_v = d2.get('direccion', '').strip()
-              dist_v = d2.get('distrito', 'No especificado').strip()
-              prov_v = d2.get('provincia', 'No especificado').strip()
-              dep_v = d2.get('departamento', 'No especificado').strip()
-        except Exception:
-          pass
+if not productos_a_mostrar:
+    st.info("No hay casacas registradas bajo este filtro.")
 
-      direcciones.append(dir_v)
-      distritos.append(dist_v)
-      provincias.append(prov_v)
-      departamentos.append(dep_v)
+# --- CUADRÍCULA DE PRODUCTOS (GRID DE 3 COLUMNAS) ---
+columnas = st.columns(3)
 
-      progress_bar.progress((i + 1) / len(df_base))
-      time.sleep(0.15)
+for idx, producto in enumerate(productos_a_mostrar):
+    columna_actual = columnas[idx % 3]
+    with columna_actual:
+        with st.container():
+            st.markdown(
+                f"""
+                <div class="product-card">
+                    <h3 style="margin-top:0; color:#1e293b; font-size:1.25rem;"><b>{producto['nombre']}</b></h3>
+                    <p style="color:#64748b; font-size:0.9rem; margin-bottom: 5px;"><b>Estilo:</b> {producto['estilo']}</p>
+            """,
+                unsafe_allow_html=True,
+            )
 
-    df_base['Direccion'] = direcciones
-    df_base['Distrito'] = distritos
-    df_base['Provincia'] = provincias
-    df_base['Departamento_Region'] = departamentos
+            # Mostrar imagen cargada o un aviso elegante
+            if producto["imagen"] and os.path.exists(producto["imagen"]):
+                st.image(producto["imagen"], use_container_width=True)
+            else:
+                st.markdown(
+                    "<div style='background:#f1f5f9; padding:40px; text-align:center; color:#94a3b8; border-radius:8px; margin-bottom:10px;'>🧥 <i>Sin imagen cargada</i></div>",
+                    unsafe_allow_html=True,
+                )
 
-    st.session_state['df_multifuente'] = df_base
-    status_text.text('¡Extracción multi-fuente finalizada con éxito!')
+            st.markdown(
+                f"""
+                <p style="color:#334155; font-size:0.95rem; min-height:40px;">{producto['descripcion']}</p>
+                <p style="color:#475569; font-size:0.85rem; margin-bottom:5px;"><b>Tallas:</b> {', '.join(producto['tallas'])}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; margin-bottom:15px;">
+                    <span class="price-tag">S/ {producto['precio']:.2f}</span>
+                </div>
+            """,
+                unsafe_allow_html=True,
+            )
 
-  # Si ya se procesó, mostramos los resultados interactivos y filtros
-  if 'df_multifuente' in st.session_state:
-    df_res = st.session_state['df_multifuente']
+            # Enlace directo a WhatsApp (Cambiar número por el real)
+            numero_whatsapp = "51900000000"  # Reemplaza con tu número de celular
+            mensaje = f"Hola, deseo comprar o consultar por la casaca *{producto['nombre']}* de HASSELTH GLOBAL."
+            link_wa = f"https://wa.me/{numero_whatsapp}?text={urllib_quote(mensaje)}"
 
-    st.sidebar.header('Filtros por Región')
-    regs = ['TODAS'] + sorted(list(df_res['Departamento_Region'].unique()))
-    reg_sel = st.sidebar.selectbox('Seleccione Departamento:', regs)
+            st.markdown(
+                f'<a href="{link_wa}" target="_blank"><button style="background-color:#16a34a; color:white; padding:10px 16px; border:none; border-radius:8px; cursor:pointer; width:100%; font-weight:600; font-size:0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">💬 Consultar / Comprar</button></a>',
+                unsafe_allow_html=True,
+            )
 
-    if reg_sel != 'TODAS':
-      df_res = df_res[df_res['Departamento_Region'] == reg_sel]
+            # Botón opcional para eliminar producto directamente
+            if st.sidebar.checkbox(
+                f"Modo gestión (Borrar)", value=False, key=f"chk_{producto['id']}"
+            ):
+                if st.button(
+                    f"🗑️ Eliminar {producto['nombre']}",
+                    key=f"del_{producto['id']}",
+                ):
+                    st.session_state.productos = [
+                        p
+                        for p in st.session_state.productos
+                        if p["id"] != producto["id"]
+                    ]
+                    st.rerun()
 
-    st.subheader(f'Empresas Encontradas ({len(df_res)})')
-    st.dataframe(df_res, use_container_width=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    # Exportación a Excel limpio
-    file_out = 'Empresas_Ubicacion_Verificada.xlsx'
-    df_res.to_excel(file_out, index=False)
-    with open(file_out, 'rb') as f:
-      st.download_button(
-          '📥 Descargar Excel Oficial Consolidado',
-          f,
-          file_name=file_out,
-          mime=(
-              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-          ),
-      )
-else:
-  st.error(
-      'No se encontró el archivo `TRABAJO.xlsx` en el repositorio. Súbelo para'
-      ' continuar.'
-  )
+# Librería para codificar el mensaje de WhatsApp de forma limpia
+try:
+    from urllib.parse import quote as urllib_quote
+except ImportError:
+    import urllib.parse
+
+    urllib_quote = urllib.parse.quote
