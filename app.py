@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote as urllib_quote
 import streamlit as st
 
 # Configuración de la página con diseño ancho y moderno
@@ -13,12 +14,9 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Estilo general y tipografía limpia */
     .main {
         background-color: #f8fafc;
     }
-    
-    /* Tarjetas de productos estilizadas */
     .product-card {
         background-color: #ffffff;
         border: 1px solid #e2e8f0;
@@ -32,8 +30,6 @@ st.markdown(
         transform: translateY(-3px);
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     }
-    
-    /* Encabezado principal */
     .header-container {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         padding: 30px;
@@ -53,8 +49,6 @@ st.markdown(
         font-size: 1.1rem;
         margin-top: 10px;
     }
-    
-    /* Estilos de precios */
     .price-tag {
         font-size: 1.35rem;
         font-weight: 700;
@@ -210,7 +204,6 @@ for idx, producto in enumerate(productos_a_mostrar):
                 unsafe_allow_html=True,
             )
 
-            # Mostrar imagen cargada o un aviso elegante
             if producto["imagen"] and os.path.exists(producto["imagen"]):
                 st.image(producto["imagen"], use_container_width=True)
             else:
@@ -230,8 +223,7 @@ for idx, producto in enumerate(productos_a_mostrar):
                 unsafe_allow_html=True,
             )
 
-            # Enlace directo a WhatsApp (Cambiar número por el real)
-            numero_whatsapp = "51900000000"  # Reemplaza con tu número de celular
+            numero_whatsapp = "51900000000"
             mensaje = f"Hola, deseo comprar o consultar por la casaca *{producto['nombre']}* de HASSELTH GLOBAL."
             link_wa = f"https://wa.me/{numero_whatsapp}?text={urllib_quote(mensaje)}"
 
@@ -240,7 +232,6 @@ for idx, producto in enumerate(productos_a_mostrar):
                 unsafe_allow_html=True,
             )
 
-            # Botón opcional para eliminar producto directamente
             if st.sidebar.checkbox(
                 f"Modo gestión (Borrar)", value=False, key=f"chk_{producto['id']}"
             ):
@@ -256,11 +247,3 @@ for idx, producto in enumerate(productos_a_mostrar):
                     st.rerun()
 
             st.markdown("</div>", unsafe_allow_html=True)
-
-# Librería para codificar el mensaje de WhatsApp de forma limpia
-try:
-    from urllib.parse import quote as urllib_quote
-except ImportError:
-    import urllib.parse
-
-    urllib_quote = urllib.parse.quote
