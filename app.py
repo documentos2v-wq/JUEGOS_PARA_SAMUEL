@@ -178,7 +178,7 @@ for idx, row in productos_a_mostrar.iterrows():
             )
 
             # Botón WhatsApp
-            numero_whatsapp = "51900000000"
+            numero_whatsapp = "51998604883"
             mensaje = f"Hola, deseo consultar por la casaca *{val_nombre}* de HASSELTH GLOBAL."
             link_wa = (
                 f"https://wa.me/{numero_whatsapp}?text={urllib_quote(mensaje)}"
