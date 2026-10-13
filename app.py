@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- DISEÑO CSS PERSONALIZADO (Estilo moderno tipo Google/E-commerce) ---
+# --- DISEÑO CSS PERSONALIZADO ---
 st.markdown(
     """
     <style>
@@ -96,68 +96,89 @@ if "productos" not in st.session_state:
         },
     ]
 
-# --- PANEL LATERAL DE ADMINISTRACIÓN ---
-st.sidebar.markdown("## ⚙️ Panel HASSELTH")
-st.sidebar.markdown("Administra los productos de tu tienda con facilidad.")
+# --- BARRA LATERAL CON ACCESO RESTRINGIDO (ADMIN) ---
+st.sidebar.markdown("## 🔒 Panel de Administración")
+st.sidebar.markdown("Acceso exclusivo para administradores de la tienda.")
 
-with st.sidebar.expander("➕ Agregar Nueva Casaca"):
-    with st.form("form_nueva_casaca", clear_on_submit=True):
-        nuevo_nombre = st.text_input("Nombre de la casaca")
-        nuevo_estilo = st.selectbox(
-            "Estilo",
-            [
-                "Impermeable",
-                "Cuero",
-                "Térmica / Deportiva",
-                "Casual",
-                "Cortaviento",
-            ],
-        )
-        nuevo_precio = st.number_input(
-            "Precio (S/)", min_value=0.0, value=120.0, step=10.0
-        )
-        nuevas_tallas = st.multiselect(
-            "Tallas disponibles",
-            ["S", "M", "L", "XL", "XXL"],
-            default=["M", "L"],
-        )
-        nueva_desc = st.text_area("Breve descripción")
-        archivo_foto = st.file_uploader(
-            "Foto de la casaca", type=["jpg", "jpeg", "png"]
-        )
+# Configura tu contraseña secreta aquí (puedes cambiar "hasselth2026" por la que prefieras)
+PASSWORD_ADMIN = "hasselth2026"
 
-        submit_btn = st.form_submit_button("Guardar en el Catálogo")
+password_ingresada = st.sidebar.text_input(
+    "Contraseña de Administrador", type="password"
+)
 
-        if submit_btn:
-            if nuevo_nombre:
-                ruta_imagen = None
-                if archivo_foto is not None:
-                    ruta_imagen = os.path.join(UPLOAD_DIR, archivo_foto.name)
-                    with open(ruta_imagen, "wb") as f:
-                        f.write(archivo_foto.getbuffer())
+if password_ingresada == PASSWORD_ADMIN:
+    st.sidebar.success("✅ Acceso concedido")
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### ⚙️ Administrar Catálogo")
 
-                nuevo_id = (
-                    max([p["id"] for p in st.session_state.productos]) + 1
-                    if st.session_state.productos
-                    else 1
-                )
-                st.session_state.productos.append(
-                    {
-                        "id": nuevo_id,
-                        "nombre": nuevo_nombre,
-                        "estilo": nuevo_estilo,
-                        "precio": float(nuevo_precio),
-                        "tallas": nuevas_tallas,
-                        "descripcion": nueva_desc,
-                        "imagen": ruta_imagen,
-                    }
-                )
-                st.success(f"¡{nuevo_nombre} agregada correctamente!")
-                st.rerun()
-            else:
-                st.error("Por favor ingresa al menos el nombre del producto.")
+    with st.sidebar.expander("➕ Agregar Nueva Casaca"):
+        with st.form("form_nueva_casaca", clear_on_submit=True):
+            nuevo_nombre = st.text_input("Nombre de la casaca")
+            nuevo_estilo = st.selectbox(
+                "Estilo",
+                [
+                    "Impermeable",
+                    "Cuero",
+                    "Térmica / Deportiva",
+                    "Casual",
+                    "Cortaviento",
+                ],
+            )
+            nuevo_precio = st.number_input(
+                "Precio (S/)", min_value=0.0, value=120.0, step=10.0
+            )
+            nuevas_tallas = st.multiselect(
+                "Tallas disponibles",
+                ["S", "M", "L", "XL", "XXL"],
+                default=["M", "L"],
+            )
+            nueva_desc = st.text_area("Breve descripción")
+            archivo_foto = st.file_uploader(
+                "Foto de la casaca", type=["jpg", "jpeg", "png"]
+            )
 
-# Filtro lateral por estilo
+            submit_btn = st.form_submit_button("Guardar en el Catálogo")
+
+            if submit_btn:
+                if nuevo_nombre:
+                    ruta_imagen = None
+                    if archivo_foto is not None:
+                        ruta_imagen = os.path.join(UPLOAD_DIR, archivo_foto.name)
+                        with open(ruta_imagen, "wb") as f:
+                            f.write(archivo_foto.getbuffer())
+
+                    nuevo_id = (
+                        max([p["id"] for p in st.session_state.productos]) + 1
+                        if st.session_state.productos
+                        else 1
+                    )
+                    st.session_state.productos.append(
+                        {
+                            "id": nuevo_id,
+                            "nombre": nuevo_nombre,
+                            "estilo": nuevo_estilo,
+                            "precio": float(nuevo_precio),
+                            "tallas": nuevas_tallas,
+                            "descripcion": nueva_desc,
+                            "imagen": ruta_imagen,
+                        }
+                    )
+                    st.success(f"¡{nuevo_nombre} agregada correctamente!")
+                    st.rerun()
+                else:
+                    st.error("Por favor ingresa al menos el nombre del producto.")
+    
+    modo_gestion_activo = True
+else:
+    if password_ingresada:
+        st.sidebar.error("❌ Contraseña incorrecta")
+    st.sidebar.info(
+        "💡 Los clientes solo pueden ver el catálogo y comprar. El panel de edición está bloqueado."
+    )
+    modo_gestion_activo = False
+
+# Filtro lateral público por estilo (visible para todos)
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 🔍 Filtrar Catálogo")
 estilos_disponibles = ["Todos"] + list(
@@ -188,7 +209,7 @@ if filtro_estilo != "Todos":
 if not productos_a_mostrar:
     st.info("No hay casacas registradas bajo este filtro.")
 
-# --- CUADRÍCULA DE PRODUCTOS (GRID DE 3 COLUMNAS) ---
+# --- CUADRÍCULA DE PRODUCTOS ---
 columnas = st.columns(3)
 
 for idx, producto in enumerate(productos_a_mostrar):
@@ -223,7 +244,7 @@ for idx, producto in enumerate(productos_a_mostrar):
                 unsafe_allow_html=True,
             )
 
-            numero_whatsapp = "51900000000"
+            numero_whatsapp = "51900000000"  # Cambia por tu número real
             mensaje = f"Hola, deseo comprar o consultar por la casaca *{producto['nombre']}* de HASSELTH GLOBAL."
             link_wa = f"https://wa.me/{numero_whatsapp}?text={urllib_quote(mensaje)}"
 
@@ -232,18 +253,20 @@ for idx, producto in enumerate(productos_a_mostrar):
                 unsafe_allow_html=True,
             )
 
-            if st.sidebar.checkbox(
-                f"Modo gestión (Borrar)", value=False, key=f"chk_{producto['id']}"
-            ):
-                if st.button(
-                    f"🗑️ Eliminar {producto['nombre']}",
-                    key=f"del_{producto['id']}",
+            # Opciones de borrado solo si el administrador puso la clave correcta
+            if modo_gestion_activo:
+                if st.checkbox(
+                    f"Modo gestión", value=False, key=f"chk_{producto['id']}"
                 ):
-                    st.session_state.productos = [
-                        p
-                        for p in st.session_state.productos
-                        if p["id"] != producto["id"]
-                    ]
-                    st.rerun()
+                    if st.button(
+                        f"🗑️ Eliminar {producto['nombre']}",
+                        key=f"del_{producto['id']}",
+                    ):
+                        st.session_state.productos = [
+                            p
+                            for p in st.session_state.productos
+                            if p["id"] != producto["id"]
+                        ]
+                        st.rerun()
 
             st.markdown("</div>", unsafe_allow_html=True)
