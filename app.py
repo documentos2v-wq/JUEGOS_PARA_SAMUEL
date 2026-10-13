@@ -39,7 +39,7 @@ st.markdown(
 )
 
 # --- ENLACE PERMANENTE DE TU GOOGLE SHEET ---
-SHEET_URL = "https://docs.google.com/spreadsheets/d/1RC8pD13DcSFtiCMoYoV8NXdsjRydzNr3MTHtMQePS0E/edit?usp=sharing"
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1RC8pD13DcSFtiCMoYoV8NXdsjRydzNr3MTHtMQePSOe/edit?usp=sharing"
 
 
 @st.cache_data(ttl=5)
@@ -67,7 +67,7 @@ def cargar_datos_hoja(url):
 
 # Cargar datos en la sesión
 if "df_casacas" not in st.session_state:
-    st.session_state.df_casacas = cargar_data_hoja(SHEET_URL)
+    st.session_state.df_casacas = cargar_datos_hoja(SHEET_URL)
 
 df_productos = st.session_state.df_casacas
 
