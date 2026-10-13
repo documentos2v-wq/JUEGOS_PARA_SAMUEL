@@ -1,4 +1,2 @@
-pandas
-requests
-openpyxl
 streamlit
+Pillow
